@@ -1,0 +1,84 @@
+---
+title: 变量与数据类型
+description: Rust 的变量默认不可变，类型在编译期确定。这一节讲清 let、mut、const 和 shadowing 的区别，并认识最常用的几种基本类型。
+difficulty: beginner
+order: 10
+draft: false
+tags:
+  - 基础语法
+  - 变量
+---
+
+## Variables
+
+用 `let` 声明变量。绑定之后，值不能再被修改：
+
+```rust
+fn main() {
+    let x = 5;
+    x = 6; // 编译错误：cannot assign twice to immutable variable
+}
+```
+
+这是 Rust 有意的设计：值不会在你不知道的地方被改掉，代码更容易推理。
+
+## 用 mut 声明可变变量
+
+确实需要修改时，加上 `mut`：
+
+```rust
+fn main() {
+    let mut count = 0;
+    count += 1;
+    println!("count = {count}");
+}
+```
+
+## 常量 const
+
+常量用 `const` 声明，规则比 `let` 更严格：
+
+```rust
+const MAX_POINTS: u32 = 100_000;
+```
+
+- 必须写明类型。
+- 不能加 `mut`，永远不可变。
+- 命名习惯是全大写加下划线。
+- 值必须是编译期就能算出来的表达式。
+
+## Shadowing（遮蔽）
+
+可以用同一个名字再声明一次，新变量会遮蔽旧变量：
+
+```rust
+fn main() {
+    let spaces = "   ";
+    let spaces = spaces.len(); // 类型从 &str 变成了 usize
+    println!("{spaces}");
+}
+```
+
+它和 `mut` 的区别是：shadowing 创建的是一个新变量，所以可以改变类型；`mut` 只能改变值，不能改变类型。
+
+## 常用的基本类型
+
+| 类型   | 例子                | 说明                                       |
+| ------ | ------------------- | ------------------------------------------ |
+| 整数   | `let a: i32 = -42;` | 默认是 `i32`，无符号用 `u32` 等            |
+| 浮点数 | `let b = 3.14;`     | 默认是 `f64`                               |
+| 布尔   | `let ok = true;`    | `bool`，只有 `true` 和 `false`             |
+| 字符   | `let c = '中';`     | `char`，占 4 字节，可以是任意 Unicode 字符 |
+
+多数情况下编译器能推断类型。推断不出来时，需要自己标注：
+
+```rust
+let n: u8 = "42".parse().unwrap();
+```
+
+## 小结
+
+- `let` 声明的变量默认不可变，需要修改就加 `mut`。
+- `const` 必须标类型，永远不可变。
+- shadowing 是重新声明一个新变量，可以改变类型。
+- 整数默认 `i32`，浮点数默认 `f64`。
