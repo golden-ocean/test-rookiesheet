@@ -4,11 +4,11 @@ import { docsMetaSchema, docsSchema } from "./schema"
 
 const docs = defineCollection({
   loader: glob({ pattern: "**/*.{md,mdx}", base: "./src/content/docs" }),
-  schema: docsSchema(),
+  schema: docsSchema,
 })
 
 const docsMeta = defineCollection({
-  loader: glob({ pattern: "**/_meta.json", base: "./src/content/docs" }),
+  loader: glob({ pattern: "**/*.nav.json", base: "./src/content/docs" }),
   schema: docsMetaSchema,
 })
 export const collections = { docs, docsMeta }

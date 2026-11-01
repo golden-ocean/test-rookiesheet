@@ -1,0 +1,40 @@
+---
+import DocsLayout from "@/components/layouts/docs.layout.astro"
+import { isLocale } from "@/i18n"
+import { getDocsNavigation } from "@/lib/docs/navigation"
+import type {
+  GetStaticPaths,
+  InferGetStaticParamsType,
+  InferGetStaticPropsType,
+} from "astro"
+import { render } from "astro:content"
+import { getCollection } from "astro:content"
+
+export const getStaticPaths = (async () => {
+  const entries = await getCollection("docs")
+  return entries
+    .filter((entry) => !entry.id.endsWith("/index") && entry.id !== "index")
+    .flatMap((entry) => {
+      const [locale, stack, ...rest] = entry.id.split("/")
+      if (import.meta.env.PROD && entry.data.draft) return []
+      if (!isLocale(locale) || !stack || rest.length === 0) return []
+      return [
+        { params: { locale, stack, slug: rest.join("/") }, props: { entry } },
+      ]
+    })
+}) satisfies GetStaticPaths
+
+type Params = InferGetStaticParamsType<typeof getStaticPaths>
+type Props = InferGetStaticPropsType<typeof getStaticPaths>
+
+const { entry } = Astro.props
+const { locale, stack } = Astro.params
+const navigationData = await getDocsNavigation(locale, stack)
+const currentPath = Astro.url.pathname
+
+const { Content } = await render(entry)
+---
+
+<DocsLayout navigationData={navigationData} currentPath={currentPath}>
+  <Content />
+</DocsLayout>

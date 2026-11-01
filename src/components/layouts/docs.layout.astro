@@ -1,0 +1,22 @@
+---
+import { DocsShell } from "@/components/docs/docs-shell"
+import BaseLayout from "@/components/layouts/base.layout.astro"
+import type { DocsMeta } from "@/schema/docs-meta.schema"
+
+interface Props {
+  navigationData: DocsMeta[]
+  currentPath: string
+}
+
+const { navigationData, currentPath } = Astro.props
+---
+
+<BaseLayout>
+  <DocsShell
+    client:load
+    currentPath={Astro.url.pathname}
+    navigationData={navigationData}
+  >
+    <slot />
+  </DocsShell>
+</BaseLayout>
