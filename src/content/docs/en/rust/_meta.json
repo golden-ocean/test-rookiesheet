@@ -1,25 +1,24 @@
 {
   "type": "group",
-  "id": "guides",
-  "title": "Guides 中文",
+  "title": "Guides",
+  "order": 1,
   "items": [
     {
       "type": "section",
-      "id": "getting-started",
       "title": "Rust",
-      "expanded": true,
+      "defaultExpanded": true,
       "items": [
         {
           "type": "article",
-          "id": "getting-started",
           "title": "Getting Started",
-          "href": "getting-started"
+          "slug": "guide/getting-started",
+          "difficulty": 1
         },
         {
           "type": "article",
-          "id": "variables",
           "title": "Variables",
-          "href": "variables"
+          "slug": "guide/variables",
+          "difficulty": 1
         }
       ]
     }

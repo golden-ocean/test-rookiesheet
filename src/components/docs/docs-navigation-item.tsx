@@ -33,10 +33,10 @@ export const DocsNavigationItem = ({
 
         // ---------- 分组：可折叠 ----------
         if (hasChildren) {
-          const open = (e.expanded ?? true) || hasActive(e, currentPath)
+          const expanded = (e.expanded ?? true) || hasActive(e, currentPath)
 
           return (
-            <Collapsible key={key} defaultExpanded={open}>
+            <Collapsible key={key} defaultExpanded={expanded}>
               <SidebarMenuItem>
                 {e.href ? (
                   <SidebarMenuButton href={e.href} isActive={isActive}>

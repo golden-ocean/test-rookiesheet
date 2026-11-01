@@ -8,7 +8,10 @@ const docs = defineCollection({
 })
 
 const docsMeta = defineCollection({
-  loader: glob({ pattern: "**/*.nav.json", base: "./src/content/docs" }),
+  loader: glob({
+    pattern: "**/*.nav.json",
+    base: "./src/content/docs",
+  }),
   schema: docsMetaSchema,
 })
 export const collections = { docs, docsMeta }

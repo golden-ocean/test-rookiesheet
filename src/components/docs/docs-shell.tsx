@@ -7,6 +7,7 @@ import {
 import { DocsBreadcrumb } from "./docs-breadcrumb"
 import { DocsProvider } from "./docs-context"
 import { DocsSidebar } from "./docs-sidebar"
+import { DocsTOC } from "./docs-toc"
 import type { NavigationItem } from "./types"
 
 interface Props {
@@ -29,7 +30,10 @@ export const DocsShell = ({
             <div className="flex items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
               <Separator orientation="vertical" className="items-center" />
-              <DocsBreadcrumb />
+              <DocsBreadcrumb
+                items={navigationData}
+                currentPath={currentPath}
+              />
             </div>
           </header>
           <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
@@ -42,6 +46,7 @@ export const DocsShell = ({
             <div className="min-h-screen flex-1 rounded-xl bg-muted/50 md:min-h-min" />*/}
           </div>
         </SidebarInset>
+        <DocsTOC toc={[{ title: "xxx", depth: 1, url: "xx" }]} />
       </SidebarProvider>
     </DocsProvider>
   )

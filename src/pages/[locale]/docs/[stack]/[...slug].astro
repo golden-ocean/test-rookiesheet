@@ -7,8 +7,7 @@ import type {
   InferGetStaticParamsType,
   InferGetStaticPropsType,
 } from "astro"
-import { render } from "astro:content"
-import { getCollection } from "astro:content"
+import { getCollection, render } from "astro:content"
 
 export const getStaticPaths = (async () => {
   const entries = await getCollection("docs")
@@ -18,9 +17,10 @@ export const getStaticPaths = (async () => {
       const [locale, stack, ...rest] = entry.id.split("/")
       if (import.meta.env.PROD && entry.data.draft) return []
       if (!isLocale(locale) || !stack || rest.length === 0) return []
-      return [
-        { params: { locale, stack, slug: rest.join("/") }, props: { entry } },
-      ]
+      // guide/index → "guide"；stack 根目录的 index → undefined
+      const slug = rest.join("/").replace(/(^|\/)index$/, "") || undefined
+
+      return [{ params: { locale, stack, slug }, props: { entry } }]
     })
 }) satisfies GetStaticPaths
 
@@ -32,7 +32,7 @@ const { locale, stack } = Astro.params
 const navigationData = await getDocsNavigation(locale, stack)
 const currentPath = Astro.url.pathname
 
-const { Content } = await render(entry)
+const { Content, headings } = await render(entry)
 ---
 
 <DocsLayout navigationData={navigationData} currentPath={currentPath}>

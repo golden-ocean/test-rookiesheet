@@ -22,3 +22,4 @@ export const docsSchema = z.object({
   cover: z.string().optional(),
 })
 export type DocsType = z.infer<typeof docsSchema>
+// export type Difficulty = NonNullable<DocsType["difficulty"]>

@@ -26,3 +26,8 @@ export interface NavigationItem {
 }
 
 export type Difficulty = 1 | 2 | 3 | 4
+
+export interface BreadcrumbsItem {
+  title: string
+  href?: string
+}

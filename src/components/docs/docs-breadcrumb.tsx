@@ -5,20 +5,43 @@ import {
   BreadcrumbList,
   BreadcrumbPage,
 } from "@/components/ui/breadcrumb"
+import type { NavigationItem } from "./types"
+import { buildBreadcrumbItems } from "./utils"
 
-export const DocsBreadcrumb = () => {
+interface Props {
+  items: NavigationItem[]
+  currentPath: string
+  homeHref?: string
+}
+
+export const DocsBreadcrumb = ({
+  items,
+  currentPath,
+  homeHref = "/",
+}: Props) => {
+  const breadcrumbs = buildBreadcrumbItems(items, currentPath)
   return (
     <Breadcrumb>
       <BreadcrumbList>
         <BreadcrumbItem>
-          <BreadcrumbLink href="#">Home</BreadcrumbLink>
+          <BreadcrumbLink href={homeHref}>Home</BreadcrumbLink>
         </BreadcrumbItem>
-        <BreadcrumbItem>
-          <BreadcrumbLink href="#">Components</BreadcrumbLink>
-        </BreadcrumbItem>
-        <BreadcrumbItem>
-          <BreadcrumbPage>Breadcrumb</BreadcrumbPage>
-        </BreadcrumbItem>
+
+        {breadcrumbs.map((e, i) => {
+          const isLast = i === breadcrumbs.length - 1
+
+          return (
+            <BreadcrumbItem key={`${e.title}-${i}`}>
+              {isLast ? (
+                <BreadcrumbPage>{e.title}</BreadcrumbPage>
+              ) : e.href ? (
+                <BreadcrumbLink href={e.href}>{e.title}</BreadcrumbLink>
+              ) : (
+                <span className="text-muted-foreground">{e.title}</span>
+              )}
+            </BreadcrumbItem>
+          )
+        })}
       </BreadcrumbList>
     </Breadcrumb>
   )
