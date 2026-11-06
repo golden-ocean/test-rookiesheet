@@ -1,120 +1,117 @@
-import { cn } from "cn"
-import * as React from "react"
+import { cn } from "@/lib/utils"
+import type { MarkdownHeading } from "astro"
+import { useEffect, useMemo, useState } from "react"
 
-import { Button } from "@/components/ui/button"
-import {
-  DropdownMenu,
-  DropdownMenuGroup,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/components/ui/dropdown-menu"
-import { MenuIcon } from "lucide-react"
-
-function useActiveItem(itemIds: string[]) {
-  const [activeId, setActiveId] = React.useState<string | null>(null)
-
-  React.useEffect(() => {
-    const observer = new IntersectionObserver(
-      (entries) => {
-        for (const entry of entries) {
-          if (entry.isIntersecting) {
-            setActiveId(entry.target.id)
-          }
-        }
-      },
-      { rootMargin: "0% 0% -80% 0%" }
-    )
-
-    for (const id of itemIds ?? []) {
-      const element = document.getElementById(id)
-      if (element) {
-        observer.observe(element)
-      }
-    }
-
-    return () => {
-      for (const id of itemIds ?? []) {
-        const element = document.getElementById(id)
-        if (element) {
-          observer.unobserve(element)
-        }
-      }
-    }
-  }, [itemIds])
-
-  return activeId
+interface Props {
+  headings: MarkdownHeading[]
+  title?: string
 }
 
-export function DocsTOC({
-  toc,
-  variant = "list",
-  className,
-}: {
-  toc: {
-    title?: React.ReactNode
-    url: string
-    depth: number
-  }[]
-  variant?: "dropdown" | "list"
-  className?: string
-}) {
-  const [open, setOpen] = React.useState(false)
-  const itemIds = React.useMemo(
-    () => toc.map((item) => item.url.replace("#", "")),
-    [toc]
+export function DocsToc({ headings, title = "本页目录" }: Props) {
+  const [activeId, setActiveId] = useState<string>()
+
+  // 只保留 H2，保持 Astro 原始顺序
+  const items = useMemo(
+    () => headings.filter((heading) => heading.depth === 2),
+    [headings]
   )
-  const activeHeading = useActiveItem(itemIds)
 
-  if (!toc?.length) {
-    return null
-  }
+  // 默认高亮第一个标题
+  const currentActiveId = activeId ?? items[0]?.slug
 
-  if (variant === "dropdown") {
-    return (
-      <DropdownMenu>
-        <DropdownMenuTrigger>
-          <Button
-            variant="outline"
-            size="sm"
-            className={cn("h-8 md:h-7", className)}
-          >
-            <MenuIcon /> On This Page
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuGroup className="no-scrollbar max-h-[70svh]">
-          {toc.map((item) => (
-            <DropdownMenuItem
-              key={item.url}
-              onClick={() => {
-                setOpen(false)
-              }}
-              data-depth={item.depth}
-              className="data-[depth=3]:pl-6 data-[depth=4]:pl-8"
-            >
-              <a href={item.url}>{item.title}</a>
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuGroup>
-      </DropdownMenu>
-    )
-  }
+  /**
+   * 监听正文滚动，更新当前目录项
+   */
+  useEffect(() => {
+    if (items.length === 0) return
+
+    const elements = items
+      .map((item) => document.getElementById(item.slug))
+      .filter((element): element is HTMLElement => element !== null)
+
+    if (elements.length === 0) return
+
+    let ticking = false
+
+    const updateActive = () => {
+      ticking = false
+
+      const threshold = 120
+      const scrollTop = window.scrollY
+      const scrollBottom = scrollTop + window.innerHeight
+      const documentHeight = document.documentElement.scrollHeight
+
+      // 滚动到页面底部时，高亮最后一个标题
+      if (scrollBottom >= documentHeight - 2) {
+        setActiveId(elements[elements.length - 1].id)
+        return
+      }
+
+      // 找到最后一个已经经过视口顶部偏移线的标题
+      let current = elements[0]
+
+      for (const element of elements) {
+        if (element.getBoundingClientRect().top <= threshold) {
+          current = element
+        } else {
+          break
+        }
+      }
+
+      setActiveId(current.id)
+    }
+
+    const handleScroll = () => {
+      if (ticking) return
+
+      ticking = true
+      window.requestAnimationFrame(updateActive)
+    }
+
+    window.addEventListener("scroll", handleScroll, {
+      passive: true,
+    })
+
+    window.addEventListener("resize", handleScroll)
+
+    return () => {
+      window.removeEventListener("scroll", handleScroll)
+      window.removeEventListener("resize", handleScroll)
+    }
+  }, [items])
+
+  if (items.length === 0) return null
 
   return (
-    <div className={cn("flex flex-col gap-2 p-4 pt-0 text-sm", className)}>
-      <p className="h-6 bg-background text-xs font-medium text-muted-foreground">
-        On This Page
-      </p>
-      {toc.map((item) => (
-        <a
-          key={item.url}
-          href={item.url}
-          className="text-[0.8rem] text-muted-foreground no-underline transition-colors hover:text-foreground data-[active=true]:font-medium data-[active=true]:text-foreground data-[depth=3]:pl-4 data-[depth=4]:pl-6"
-          data-active={item.url === `#${activeHeading}`}
-          data-depth={item.depth}
-        >
-          {item.title}
-        </a>
-      ))}
-    </div>
+    <nav aria-label="本页目录">
+      <h2 className="mb-4 text-sm font-semibold text-foreground">{title}</h2>
+
+      <ul className="space-y-1 border-l">
+        {items.map((item) => {
+          const active = currentActiveId === item.slug
+
+          return (
+            <li key={item.slug}>
+              <a
+                href={`#${encodeURIComponent(item.slug)}`}
+                aria-current={active ? "location" : undefined}
+                className={cn(
+                  "relative block py-1.5 pr-2 pl-4 text-sm leading-6 transition-colors",
+                  active
+                    ? "font-medium text-primary"
+                    : "text-muted-foreground hover:text-foreground"
+                )}
+              >
+                {active && (
+                  <span className="absolute inset-y-0 -left-px w-0.5 rounded-full bg-primary" />
+                )}
+
+                {item.text}
+              </a>
+            </li>
+          )
+        })}
+      </ul>
+    </nav>
   )
 }

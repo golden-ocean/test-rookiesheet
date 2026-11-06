@@ -11,23 +11,27 @@ export interface NavigationItem {
   badge?: string
   /** 默认是否展开（仅对有 items 的节点有意义） */
   expanded?: boolean
-  /** 是否隐藏 */
-  hidden?: boolean
-  /** 排序 */
-  order?: number
   /** 是否当前页（一般由路由计算后注入，不必写在 JSON 里） */
   isActive?: boolean
-  /** 外部链接 */
-  external?: boolean
-  /** 可选语义，方便以后扩展，渲染时不是必须 */
-  type?: "group" | "section" | "article"
+  // /** 可选语义，方便以后扩展，渲染时不是必须 */
+  // type?: "group" | "section" | "article"
   /** 子项（有则视为可折叠分组） */
   items?: NavigationItem[]
 }
 
 export type Difficulty = 1 | 2 | 3 | 4
 
-export interface BreadcrumbsItem {
+export interface BreadcrumbItem {
   title: string
   href?: string
+}
+
+export interface PagerItem {
+  title: string
+  href: string
+}
+
+export interface Pager {
+  prev?: PagerItem
+  next?: PagerItem
 }

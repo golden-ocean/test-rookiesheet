@@ -1,4 +1,5 @@
 import { Collapsible, CollapsibleContent } from "@/components/ui/collapsible"
+
 import {
   SidebarMenuAction,
   SidebarMenuButton,
@@ -7,9 +8,11 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+
 import { ChevronRightIcon } from "lucide-react"
+
 import type { NavigationItem } from "./types"
-import { hasActive, isSamePath } from "./utils"
+import { hasActive, isExternalHref, isSamePath } from "./utils"
 
 interface Props {
   items: readonly NavigationItem[]
@@ -25,12 +28,18 @@ export const DocsNavigationItem = ({
   return (
     <>
       {items.map((e, i) => {
-        if (e.hidden) return null
         const key = e.id ?? e.href ?? `${e.title}-${i}`
-        const children = e.items?.filter((c) => !c.hidden) ?? []
+        const children = e.items ?? []
         const hasChildren = children.length > 0
-        const isActive = !!e.href && isSamePath(e.href, currentPath)
-
+        const external = isExternalHref(e.href ?? "")
+        const isActive =
+          !!e.href && !external && isSamePath(e.href, currentPath)
+        const linkProps = external
+          ? {
+              target: "_blank" as const,
+              rel: "noopener noreferrer",
+            }
+          : {}
         // ---------- 分组：可折叠 ----------
         if (hasChildren) {
           const expanded = (e.expanded ?? true) || hasActive(e, currentPath)
@@ -39,7 +48,11 @@ export const DocsNavigationItem = ({
             <Collapsible key={key} defaultExpanded={expanded}>
               <SidebarMenuItem>
                 {e.href ? (
-                  <SidebarMenuButton href={e.href} isActive={isActive}>
+                  <SidebarMenuButton
+                    href={e.href}
+                    isActive={isActive}
+                    {...linkProps}
+                  >
                     <span className="font-medium">{e.title}</span>
                   </SidebarMenuButton>
                 ) : (
@@ -74,7 +87,7 @@ export const DocsNavigationItem = ({
         const label = (
           <>
             <span>{e.title}</span>
-            {/*<DifficultyBadge difficulty={e.difficulty} />*/}
+            {/* <DifficultyBadge difficulty={e.difficulty} /> */}
           </>
         )
 
@@ -86,6 +99,7 @@ export const DocsNavigationItem = ({
                 isActive={isActive}
                 className="justify-between"
                 data-astro-prefetch
+                {...linkProps}
               >
                 {label}
               </SidebarMenuSubButton>
@@ -99,6 +113,7 @@ export const DocsNavigationItem = ({
               href={e.href ?? "#"}
               isActive={isActive}
               className="justify-between font-medium"
+              {...linkProps}
             >
               {label}
             </SidebarMenuButton>

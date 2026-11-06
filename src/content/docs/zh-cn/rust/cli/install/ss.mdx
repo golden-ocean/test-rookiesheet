@@ -1,0 +1,419 @@
+---
+title: sssss
+description: Rust 的变量默认不可变，类型在编译期确定。这一节讲清 let、mut、const 和 shadowing 的区别，并认识最常用的几种基本类型。
+difficulty: beginner
+tags:
+  - 基础语法
+  - 变量
+order: 10
+draft: false
+
+sidebar:
+  title: sss
+  order: 10
+  hidden: false
+---
+
+# Rust 项目入门指南
+
+Rust 是一门注重性能、内存安全和并发能力的系统编程语言。它通过所有权（Ownership）、借用（Borrowing）和生命周期（Lifetime）等机制，在不依赖垃圾回收器的情况下保证内存安全。
+
+本文将从开发环境开始，逐步介绍 Rust 项目的创建、目录结构、依赖管理和基本开发流程。
+
+## 一、环境准备
+
+在开始编写 Rust 程序之前，需要安装 Rust 工具链。
+
+Rust 官方推荐使用 `rustup` 管理 Rust 版本、编译器和相关工具。
+
+### 1.1 安装 Rust
+
+访问 [Rust 官方网站](https://www.rust-lang.org/) 获取安装工具。
+
+macOS、Linux 用户可以通过终端执行：
+
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
+
+Windows 用户可以下载并运行 `rustup-init.exe`。
+
+安装完成后，可以使用以下命令检查环境：
+
+```bash
+rustc --version
+cargo --version
+rustup --version
+```
+
+#### 工具链说明
+
+Rust 开发环境主要包含三个工具：
+
+| 工具   | 作用                         |
+| ------ | ---------------------------- |
+| rustc  | Rust 编译器                  |
+| cargo  | 项目管理、依赖管理和构建工具 |
+| rustup | Rust 工具链和版本管理工具    |
+
+其中，Cargo 是日常开发中最常使用的工具。
+
+### 1.2 配置编辑器
+
+Rust 可以使用多种编辑器进行开发。
+
+推荐使用 Visual Studio Code，并安装 Rust Analyzer 扩展。
+
+Rust Analyzer 可以提供：
+
+- 代码补全和类型提示
+- 实时语法检查
+- 自动导入
+- 跳转到定义
+- 代码重构
+- 文档提示
+
+## 二、创建第一个项目
+
+Rust 使用 Cargo 管理项目。创建新项目时，不需要手动配置编译环境和目录结构。
+
+### 2.1 创建项目
+
+执行以下命令：
+
+```bash
+cargo new hello-rust
+```
+
+进入项目目录：
+
+```bash
+cd hello-rust
+```
+
+Cargo 会自动生成一个基础项目。
+
+### 2.2 运行项目
+
+执行：
+
+```bash
+cargo run
+```
+
+终端输出：
+
+```text
+Hello, world!
+```
+
+`cargo run` 会自动完成编译和运行两个步骤。
+
+如果只想检查代码是否能够编译，可以执行：
+
+```bash
+cargo check
+```
+
+相比完整编译，`cargo check` 通常更快，适合开发过程中频繁检查代码。
+
+### 2.3 编译项目
+
+执行：
+
+```bash
+cargo build
+```
+
+默认情况下，编译产物会保存在 `target/debug` 目录。
+
+如果需要构建优化后的发布版本：
+
+```bash
+cargo build --release
+```
+
+发布版本会生成在 `target/release` 目录。
+
+## 三、项目目录结构
+
+理解项目结构是开始大型 Rust 项目开发的重要一步。
+
+一个默认的 Cargo 项目通常包含以下文件：
+
+```text
+hello-rust/
+├── Cargo.toml
+├── Cargo.lock
+├── src/
+│   └── main.rs
+└── target/
+```
+
+### 3.1 Cargo.toml
+
+`Cargo.toml` 是项目的配置文件，主要用于定义项目元数据、依赖和构建配置。
+
+示例：
+
+```toml
+[package]
+name = "hello-rust"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+```
+
+#### package 配置
+
+`[package]` 用于描述当前项目。
+
+| 字段    | 说明         |
+| ------- | ------------ |
+| name    | 项目名称     |
+| version | 项目版本     |
+| edition | Rust Edition |
+
+#### dependencies 配置
+
+`[dependencies]` 用于声明项目依赖。
+
+例如添加 `serde`：
+
+```toml
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+```
+
+Cargo 会自动解析依赖关系，并下载所需的软件包。
+
+### 3.2 Cargo.lock
+
+`Cargo.lock` 用于记录当前项目实际使用的依赖版本。
+
+它可以确保不同开发环境使用一致的依赖解析结果。
+
+对于应用程序，通常应该将 `Cargo.lock` 提交到版本控制系统。
+
+对于库项目，则通常由项目维护者根据发布策略决定是否提交。
+
+### 3.3 src 目录
+
+`src` 是 Rust 源代码目录。
+
+默认项目中的 `main.rs` 是程序入口：
+
+```rust
+fn main() {
+    println!("Hello, world!");
+}
+```
+
+其中：
+
+- `fn` 用于定义函数。
+- `main` 是可执行程序的入口函数。
+- `println!` 是一个宏，用于向标准输出打印内容。
+
+### 3.4 target 目录
+
+`target` 是 Cargo 的构建输出目录。
+
+它包含编译过程产生的中间文件和最终可执行文件。
+
+通常不需要将它提交到 Git 仓库。
+
+可以在 `.gitignore` 中添加：
+
+```gitignore
+/target
+```
+
+## 四、Rust 基础语法
+
+了解项目结构后，可以开始学习 Rust 的基本语法。
+
+### 4.1 变量与可变性
+
+Rust 默认变量不可变。
+
+```rust
+fn main() {
+    let name = "Rust";
+
+    println!("Hello, {name}");
+}
+```
+
+如果需要修改变量的值，需要使用 `mut`：
+
+```rust
+fn main() {
+    let mut count = 0;
+
+    count += 1;
+
+    println!("count = {count}");
+}
+```
+
+不可变变量有助于减少意外修改，使程序行为更加容易预测。
+
+### 4.2 基本数据类型
+
+Rust 提供了常见的基础数据类型。
+
+| 类型   | 示例                   | 说明            |
+| ------ | ---------------------- | --------------- |
+| i32    | `let x: i32 = 10;`     | 32 位有符号整数 |
+| u64    | `let x: u64 = 10;`     | 64 位无符号整数 |
+| f64    | `let x: f64 = 3.14;`   | 64 位浮点数     |
+| bool   | `let x = true;`        | 布尔类型        |
+| char   | `let x = 'A';`         | Unicode 字符    |
+| String | `String::from("Rust")` | 可增长的字符串  |
+
+### 4.3 函数
+
+使用 `fn` 关键字定义函数。
+
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    a + b
+}
+
+fn main() {
+    let result = add(10, 20);
+
+    println!("result = {result}");
+}
+```
+
+函数可以声明参数类型和返回值类型。
+
+在 Rust 中，表达式可以作为函数的返回值。最后一个表达式不需要添加分号。
+
+### 4.4 条件判断
+
+Rust 使用 `if` 表达式进行条件判断。
+
+```rust
+fn main() {
+    let score = 85;
+
+    let level = if score >= 60 {
+        "通过"
+    } else {
+        "未通过"
+    };
+
+    println!("{level}");
+}
+```
+
+需要注意，`if` 的不同分支必须返回兼容的类型。
+
+## 五、Cargo 常用命令
+
+Cargo 不仅负责运行和编译程序，还提供了丰富的项目管理能力。
+
+### 5.1 项目管理
+
+| 命令          | 作用                 |
+| ------------- | -------------------- |
+| `cargo new`   | 创建新项目           |
+| `cargo init`  | 在当前目录初始化项目 |
+| `cargo run`   | 编译并运行           |
+| `cargo build` | 编译项目             |
+| `cargo check` | 快速检查代码         |
+| `cargo clean` | 清理构建产物         |
+
+### 5.2 代码质量检查
+
+Rust 提供了格式化工具和代码静态检查工具。
+
+格式化代码：
+
+```bash
+cargo fmt
+```
+
+检查代码风格：
+
+```bash
+cargo fmt --check
+```
+
+使用 Clippy 检查潜在问题：
+
+```bash
+cargo clippy
+```
+
+建议在日常开发中保持代码格式统一，并定期运行 Clippy。
+
+### 5.3 运行测试
+
+执行项目测试：
+
+```bash
+cargo test
+```
+
+可以在源代码中编写测试：
+
+```rust
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_add() {
+        assert_eq!(2 + 3, 5);
+    }
+}
+```
+
+测试代码默认不会进入普通发布构建。
+
+## 六、总结
+
+通过本文，我们完成了 Rust 开发环境的准备，并了解了 Cargo 项目的基本结构和常用命令。
+
+需要掌握的核心内容包括：
+
+1. 使用 rustup 安装和管理 Rust 工具链。
+2. 使用 Cargo 创建、编译和运行项目。
+3. 理解 `Cargo.toml`、`Cargo.lock` 和 `src` 的作用。
+4. 掌握变量、数据类型、函数和条件判断。
+5. 使用 `cargo fmt`、`cargo clippy` 和 `cargo test` 提高代码质量。
+
+## 七、下一步学习
+
+掌握基础语法之后，可以继续学习 Rust 的核心机制。
+
+### 7.1 所有权与借用
+
+所有权是 Rust 最重要的语言特性之一。
+
+它决定了值在程序中的生命周期，以及哪些代码可以访问或修改数据。
+
+### 7.2 结构体与枚举
+
+结构体用于组织相关数据，枚举用于表达具有多个可能状态的数据。
+
+它们是构建复杂领域模型的重要基础。
+
+### 7.3 模块系统
+
+随着项目规模增长，需要使用模块组织代码。
+
+可以继续学习：
+
+- `mod`：定义模块
+- `use`：引入路径
+- `pub`：控制可见性
+- `crate`：当前 crate 根路径
+- `super`：父模块路径
+
+完成这些内容后，就可以开始构建更完整的 Rust 应用程序。

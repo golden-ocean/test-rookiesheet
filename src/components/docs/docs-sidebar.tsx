@@ -37,18 +37,16 @@ export const DocsSidebar = ({
           </SidebarMenuItem>
         </SidebarMenu>
       </SidebarHeader>
-      <SidebarContent>
+      <SidebarContent className="gap-2">
         {navigationData.map((g, i) => (
           <SidebarGroup key={`${g.title}-${i}`}>
             <SidebarGroupLabel>{g.title}</SidebarGroupLabel>
             <SidebarGroupContent>
               <SidebarMenu>
-                {g.items && (
-                  <DocsNavigationItem
-                    items={g.items}
-                    currentPath={currentPath}
-                  />
-                )}
+                <DocsNavigationItem
+                  items={g.items ?? []}
+                  currentPath={currentPath}
+                />
               </SidebarMenu>
             </SidebarGroupContent>
           </SidebarGroup>

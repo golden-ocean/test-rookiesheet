@@ -1,85 +1,108 @@
+// lib/docs/navigation.ts
 import type { LocaleType } from "@/i18n"
-import type {
-  DocsArticle,
-  DocsGroup,
-  DocsSection,
-} from "@/schema/docs-meta.schema"
+import type { DocsType } from "@/schema/docs.schema"
 import { getCollection, type CollectionEntry } from "astro:content"
 
-interface Context {
-  base: string // /zh-CN/docs/react
-  prefix: string // zh-CN/react/
-  docIds: ReadonlySet<string>
-  source: string // 文件路径
+type DocsEntry = CollectionEntry<"docs">
+
+export interface NavNode {
+  title: string
+  href?: string
+  difficulty?: DocsType["difficulty"]
+  items?: NavNode[]
 }
 
-const resolveHref = (slug: string, ctx: Context, asDir = false): string => {
-  const rel = slug.replace(/^\/+|\/+$/g, "")
-  const ids = (asDir ? [`${rel}/index`, rel] : [rel]).map((p) => ctx.prefix + p)
-  const id = ids.find((i) => ctx.docIds.has(i))
+type Ranked = NavNode & { order: number }
 
-  if (!id) {
-    throw new Error(
-      `[Docs Navigation] ${ctx.source}: not found, tried ${ids.join(" or ")}`
-    )
+interface Draft {
+  path: string[]
+  /** 叶子文档，或目录下的 index 文档 */
+  entry?: DocsEntry
+  children: Map<string, Draft>
+}
+
+const DEFAULT_ORDER = 100
+
+const humanize = (s: string) =>
+  s.replace(/[-_]+/g, " ").replace(/\b\w/g, (c) => c.toUpperCase())
+
+const byOrder = (a: Ranked, b: Ranked) =>
+  a.order - b.order || a.title.localeCompare(b.title)
+
+/** index 有正文才算"有内容"；叶子文档始终视为有内容 */
+const hasContent = (node: Draft): boolean => {
+  const { entry } = node
+  if (!entry) return false
+  // 叶子（没有子目录）一律可点击
+  if (node.children.size === 0) return true
+  return Boolean(entry.body?.trim())
+}
+
+/** 按文件夹关系建树；index 归并到所在目录 */
+const buildTree = (entries: DocsEntry[], prefix: string): Draft => {
+  const root: Draft = { path: [], children: new Map() }
+
+  for (const entry of entries) {
+    const segs = entry.id.slice(prefix.length).split("/")
+    if (segs.at(-1) === "index") segs.pop()
+
+    let node = root
+    for (const seg of segs) {
+      let next = node.children.get(seg)
+      if (!next) {
+        next = { path: [...node.path, seg], children: new Map() }
+        node.children.set(seg, next)
+      }
+      node = next
+    }
+    node.entry = entry
   }
-
-  // index 对应目录路由，不暴露 /index
-  const path = id.slice(ctx.prefix.length).replace(/(^|\/)index$/, "")
-  return path ? `${ctx.base}/${path}` : ctx.base
+  return root
 }
 
-/** 先全部解析（保证隐藏项的死链也能报出来），再过滤隐藏并排序 */
-const visibleSorted = <T extends { order: number; hidden: boolean }>(
-  items: T[]
-): T[] => items.filter((i) => !i.hidden).sort((a, b) => a.order - b.order)
+const toNav = (node: Draft, base: string): Ranked | null => {
+  const { entry } = node
+  if (entry?.data.sidebar.hidden) return null
 
-const resolveArticle = (a: DocsArticle, ctx: Context): DocsArticle =>
-  a.slug ? { ...a, href: resolveHref(a.slug, ctx) } : a
+  const items = [...node.children.values()]
+    .map((c) => toNav(c, base))
+    .filter((n): n is Ranked => n !== null)
+    .sort(byOrder)
 
-const resolveSection = (s: DocsSection, ctx: Context): DocsSection => ({
-  ...s,
-  ...(s.slug && { href: resolveHref(s.slug, ctx, true) }),
-  items: visibleSorted(s.items.map((a) => resolveArticle(a, ctx))),
-})
+  // 没有 index 且子项全被隐藏/为空的目录，直接丢掉
+  if (!entry && items.length === 0) return null
 
-const resolveGroup = (g: DocsGroup, ctx: Context): DocsGroup => ({
-  ...g,
-  items: visibleSorted(
-    g.items.map((i) =>
-      i.type === "section" ? resolveSection(i, ctx) : resolveArticle(i, ctx)
-    )
-  ),
-})
+  return {
+    title:
+      entry?.data.sidebar.title ??
+      entry?.data.title ??
+      humanize(node.path.at(-1)!),
+    order: entry?.data.sidebar.order ?? items[0]?.order ?? DEFAULT_ORDER,
+    href: hasContent(node) ? `${base}/${node.path.join("/")}` : undefined,
+    difficulty: entry?.data.difficulty,
+    items: items.length ? items : undefined,
+  }
+}
 
-export const buildDocsNavigation = (
+/** 顶层文件夹 = group，对应 DocSidebar 里的 SidebarGroup */
+export const getDocsNavigation = async (
   locale: LocaleType,
-  stack: string,
-  docs: CollectionEntry<"docs">[],
-  metaEntries: CollectionEntry<"docsMeta">[]
-): DocsGroup[] => {
-  const prefix = `${locale}/${stack}/`
-  const base = `/${locale}/docs/${stack}`
-  const inScope = ({ id }: { id: string }) => id.startsWith(prefix)
-  const docIds = new Set(docs.filter(inScope).map((d) => d.id))
-
-  return visibleSorted(
-    metaEntries.filter(inScope).map((e) =>
-      resolveGroup(e.data, {
-        base,
-        prefix,
-        docIds,
-        source: e.filePath ?? e.id, // filePath 为空时退回 id
-      })
-    )
+  stack: string
+): Promise<NavNode[]> => {
+  // content id 会被 slugify 成小写，这里统一小写比较
+  const prefix = `${locale}/${stack}/`.toLowerCase()
+  const entries = await getCollection(
+    "docs",
+    ({ id, data }) =>
+      id.toLowerCase().startsWith(prefix) &&
+      !(import.meta.env.PROD && data.draft)
   )
-}
 
-export const getDocsNavigation = async (locale: LocaleType, stack: string) => {
-  const [docs, metaEntries] = await Promise.all([
-    // 与 getStaticPaths 保持一致：生产环境不生成草稿页，导航也不应指向它们
-    getCollection("docs", ({ data }) => !(import.meta.env.PROD && data.draft)),
-    getCollection("docsMeta"),
-  ])
-  return buildDocsNavigation(locale, stack, docs, metaEntries)
+  const root = buildTree(entries, prefix)
+  const base = `/${locale}/docs/${stack}`
+
+  return [...root.children.values()]
+    .map((c) => toNav(c, base))
+    .filter((n): n is Ranked => n !== null)
+    .sort(byOrder)
 }

@@ -1,40 +1,65 @@
 ---
 import DocsLayout from "@/components/layouts/docs.layout.astro"
 import { isLocale } from "@/i18n"
-import { getDocsNavigation } from "@/lib/docs/navigation"
+import { getDocsNavigation } from "@/lib/docs/docs"
 import type {
   GetStaticPaths,
   InferGetStaticParamsType,
   InferGetStaticPropsType,
 } from "astro"
 import { getCollection, render } from "astro:content"
+import { parse } from "astro:schema"
 
 export const getStaticPaths = (async () => {
   const entries = await getCollection("docs")
-  return entries
-    .filter((entry) => !entry.id.endsWith("/index") && entry.id !== "index")
-    .flatMap((entry) => {
-      const [locale, stack, ...rest] = entry.id.split("/")
-      if (import.meta.env.PROD && entry.data.draft) return []
-      if (!isLocale(locale) || !stack || rest.length === 0) return []
-      // guide/index → "guide"；stack 根目录的 index → undefined
-      const slug = rest.join("/").replace(/(^|\/)index$/, "") || undefined
 
-      return [{ params: { locale, stack, slug }, props: { entry } }]
-    })
+  return entries.flatMap((entry) => {
+    const [locale, stack, ...rest] = entry.id.split("/")
+
+    // 生产环境过滤草稿
+    if (import.meta.env.PROD && entry.data.draft) return []
+    // 过滤无效路径和 stack 根首页
+    if (!isLocale(locale) || !stack || rest.length === 0) {
+      return []
+    }
+
+    return [
+      {
+        params: {
+          locale,
+          stack,
+          slug: rest.join("/"),
+        },
+        props: { entry },
+      },
+    ]
+  })
 }) satisfies GetStaticPaths
 
 type Params = InferGetStaticParamsType<typeof getStaticPaths>
 type Props = InferGetStaticPropsType<typeof getStaticPaths>
 
+const { locale, stack, slug } = Astro.params
 const { entry } = Astro.props
-const { locale, stack } = Astro.params
-const navigationData = await getDocsNavigation(locale, stack)
+
 const currentPath = Astro.url.pathname
+
+// 统一构建 Sidebar、Breadcrumb、Pager
+const navigation = await getDocsNavigation(locale, stack)
+// 当前文档的面包屑
+const breadcrumbs = navigation.breadcrumbs[slug] ?? []
+// 当前文档的前后翻页
+const pager = navigation.pager[currentPath]
 
 const { Content, headings } = await render(entry)
 ---
 
-<DocsLayout navigationData={navigationData} currentPath={currentPath}>
+<DocsLayout
+  navigationData={navigation.sidebar}
+  breadcrumbData={breadcrumbs}
+  pagerData={pager}
+  headings={headings}
+  currentPath={currentPath}
+>
   <Content />
 </DocsLayout>

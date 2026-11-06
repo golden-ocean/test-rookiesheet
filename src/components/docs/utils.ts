@@ -5,6 +5,13 @@ const normalize = (path: string) => path.replace(/\/+$/, "") || "/"
 export const isSamePath = (a: string, b: string) =>
   normalize(a) === normalize(b)
 
+/**
+ * 判断是否为外部链接。
+ */
+export const isExternalHref = (href: string): boolean => {
+  return /^(https?:)?\/\//i.test(href)
+}
+
 // 当前页是否在这个节点自己或它的后代里（决定默认展开）
 export const hasActive = (node: NavigationItem, currentPath: string): boolean =>
   (!!node.href && isSamePath(node.href, currentPath)) ||
@@ -24,11 +31,7 @@ export const findPath = (
     const nextTrail = [...trail, node]
 
     // 命中：article 的 href 与当前路径完全相同
-    if (
-      node.type === "article" &&
-      node.href &&
-      normalize(node.href) === normalize(targetPath)
-    ) {
+    if (node.href && normalize(node.href) === normalize(targetPath)) {
       return nextTrail
     }
 
@@ -54,10 +57,9 @@ export const buildBreadcrumbItems = (
 ): NavigationItem[] => {
   const trail = findPath(sidebar, currentPath)
   if (!trail) return []
-  const visible = trail.filter((n) => !n.hidden)
-  const lastIndex = visible.length - 1
+  const lastIndex = trail.length - 1
 
-  return visible.map((node, i) => {
+  return trail.map((node, i) => {
     if (i === lastIndex) {
       // 当前页
       return { title: node.title }

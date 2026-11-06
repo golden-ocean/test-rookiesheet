@@ -4,49 +4,61 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import type { MarkdownHeading } from "astro"
 import { DocsBreadcrumb } from "./docs-breadcrumb"
+import { DocsContent } from "./docs-content"
 import { DocsProvider } from "./docs-context"
+import { DocsPager } from "./docs-pager"
 import { DocsSidebar } from "./docs-sidebar"
-import { DocsTOC } from "./docs-toc"
-import type { NavigationItem } from "./types"
+import { DocsToc } from "./docs-toc"
+import type { BreadcrumbItem, NavigationItem, Pager } from "./types"
 
 interface Props {
   children: React.ReactNode
   currentPath: string
   navigationData: NavigationItem[]
+  breadcrumbData: BreadcrumbItem[]
+  pagerData: Pager
+  headings: MarkdownHeading[]
 }
 
 export const DocsShell = ({
   currentPath = "",
   navigationData = [],
+  breadcrumbData = [],
+  headings = [],
+  pagerData,
   children,
 }: Props) => {
   return (
     <DocsProvider value={{ currentPath, navigationData }}>
       <SidebarProvider>
         <DocsSidebar />
+
         <SidebarInset>
-          <header className="flex h-16 shrink-0 items-center gap-2">
-            <div className="flex items-center gap-2 px-4">
+          {/* Header */}
+          <header className="sticky top-0 z-10 flex h-12 shrink-0 items-center gap-2 border-b bg-background">
+            <div className="flex min-w-0 items-center gap-2 px-4">
               <SidebarTrigger className="-ml-1" />
-              <Separator orientation="vertical" className="items-center" />
-              <DocsBreadcrumb
-                items={navigationData}
-                currentPath={currentPath}
-              />
+              <Separator orientation="vertical" className="h-4" />
+              <DocsBreadcrumb items={breadcrumbData} />
             </div>
           </header>
-          <div className="flex flex-1 flex-col gap-4 p-4 pt-0">
-            {children}
-            {/*<div className="grid auto-rows-min gap-4 md:grid-cols-3">
-              <div className="aspect-video rounded-xl bg-muted/50" />
-              <div className="aspect-video rounded-xl bg-muted/50" />
-              <div className="aspect-video rounded-xl bg-muted/50" />
-            </div>
-            <div className="min-h-screen flex-1 rounded-xl bg-muted/50 md:min-h-min" />*/}
+
+          {/* Main Content */}
+          <div className="grid flex-1 grid-cols-1 gap-4 px-6 py-8 lg:grid-cols-[minmax(0,1fr)_220px] lg:gap-8 xl:px-8">
+            {/* Article */}
+            <article className="min-w-0">
+              <DocsContent>{children}</DocsContent>
+              <DocsPager pager={pagerData} />
+            </article>
+
+            {/* TOC */}
+            <aside className="sticky top-24 hidden h-fit max-h-[calc(100vh-7rem)] overflow-y-auto lg:block">
+              <DocsToc headings={headings} />
+            </aside>
           </div>
         </SidebarInset>
-        <DocsTOC toc={[{ title: "xxx", depth: 1, url: "xx" }]} />
       </SidebarProvider>
     </DocsProvider>
   )
