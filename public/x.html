@@ -1,0 +1,1384 @@
+<!doctype html>
+<html lang="zh-CN" data-theme="light">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>简介 · Sentinel 文档</title>
+<meta name="description" content="Sentinel 是一套面向 Rust 服务端的身份与访问管理参考架构：DDD 划分模块边界，CQRS 分离读写路径。">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%2309090b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z'/%3E%3Cpath d='m9 12 2 2 4-4'/%3E%3C/svg%3E">
+<script>
+  /* 防主题闪烁：在首帧前同步 localStorage / 系统偏好 */
+  (function () {
+    try {
+      var t = localStorage.getItem('sentinel-theme');
+      if (!t) t = matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+      document.documentElement.dataset.theme = t;
+    } catch (e) {}
+  })();
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600;700&family=Geist+Mono:wght@400;500;600&family=Instrument+Serif:ital,wght@0,400;1,400&family=Noto+Sans+SC:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+/* ============================================================
+   Design Tokens —— shadcn/ui 默认主题（new-york）
+   ============================================================ */
+:root {
+  color-scheme: light;
+
+  /* 语义色（shadcn default） */
+  --background: 0 0% 100%;
+  --foreground: 240 10% 3.9%;
+  --card: 0 0% 100%;
+  --card-foreground: 240 10% 3.9%;
+  --popover: 0 0% 100%;
+  --primary: 240 5.9% 10%;
+  --primary-foreground: 0 0% 98%;
+  --secondary: 240 4.8% 95.9%;
+  --secondary-foreground: 240 5.9% 10%;
+  --muted: 240 4.8% 95.9%;
+  --muted-foreground: 240 3.8% 46.1%;
+  --accent: 240 4.8% 95.9%;
+  --accent-foreground: 240 5.9% 10%;
+  --destructive: 0 84.2% 60.2%;
+  --border: 240 5.9% 90%;
+  --input: 240 5.9% 90%;
+  --ring: 240 10% 3.9%;
+  --radius: 0.5rem;
+
+  /* 极克制的语义点缀色：仅用于 New 徽章 / Warning / 系统状态 */
+  --amber: 35 92% 42%;
+  --amber-soft: 35 92% 95%;
+  --green: 142 71% 38%;
+
+  /* 代码高亮 */
+  --tok-c: 240 4% 46%;
+  --tok-k: 240 10% 3.9%;
+  --tok-s: 142 64% 26%;
+  --tok-f: 221 47% 43%;
+  --tok-n: 25 85% 38%;
+
+  /* 阴影三级（Y 2 / 8 / 24，带环境色） */
+  --shadow-1: 0 1px 2px hsl(240 10% 3.9% / .06), 0 1px 3px hsl(240 10% 3.9% / .04);
+  --shadow-2: 0 4px 12px hsl(240 10% 3.9% / .08);
+  --shadow-3: 0 24px 48px hsl(240 10% 3.9% / .16);
+
+  /* 字体 */
+  --font-sans: "Geist", "Noto Sans SC", ui-sans-serif, sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, monospace;
+  --font-serif: "Instrument Serif", "Noto Sans SC", serif;
+
+  /* 字阶（1.25 模块化） */
+  --text-xs: .75rem;
+  --text-sm: .875rem;
+  --text-base: 1rem;
+  --text-lg: 1.125rem;
+  --text-xl: 1.25rem;
+  --text-2xl: 1.5rem;
+  --text-3xl: 1.875rem;
+  --text-4xl: 2.25rem;
+  --text-5xl: 3rem;
+  --text-6xl: 3.75rem;
+
+  /* 间距梯度 */
+  --space-1: 4px; --space-2: 8px; --space-3: 12px; --space-4: 16px;
+  --space-5: 24px; --space-6: 32px; --space-7: 48px; --space-8: 64px; --space-9: 96px;
+
+  /* 动效 */
+  --ease-out: cubic-bezier(.16, 1, .3, 1);
+  --dur-fast: 150ms;
+  --dur-base: 300ms;
+  --dur-slow: 600ms;
+}
+
+[data-theme="dark"] {
+  color-scheme: dark;
+  --background: 240 10% 3.9%;
+  --foreground: 0 0% 98%;
+  --card: 240 10% 3.9%;
+  --card-foreground: 0 0% 98%;
+  --popover: 240 10% 3.9%;
+  --primary: 0 0% 98%;
+  --primary-foreground: 240 5.9% 10%;
+  --secondary: 240 3.7% 15.9%;
+  --secondary-foreground: 0 0% 98%;
+  --muted: 240 3.7% 15.9%;
+  --muted-foreground: 240 5% 64.9%;
+  --accent: 240 3.7% 15.9%;
+  --accent-foreground: 0 0% 98%;
+  --destructive: 0 62.8% 50%;
+  --border: 240 3.7% 15.9%;
+  --input: 240 3.7% 15.9%;
+  --ring: 240 4.9% 83.9%;
+  --amber: 35 95% 62%;
+  --amber-soft: 35 40% 16%;
+  --green: 142 60% 55%;
+  --tok-c: 240 5% 58%;
+  --tok-k: 0 0% 98%;
+  --tok-s: 142 55% 62%;
+  --tok-f: 213 75% 72%;
+  --tok-n: 32 95% 66%;
+  --shadow-1: 0 1px 2px hsl(0 0% 0% / .4);
+  --shadow-2: 0 4px 12px hsl(0 0% 0% / .45);
+  --shadow-3: 0 24px 48px hsl(0 0% 0% / .6);
+}
+
+/* ============================================================
+   Base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+* { margin: 0; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
+body {
+  font-family: var(--font-sans);
+  font-size: var(--text-base);
+  line-height: 1.7;
+  letter-spacing: .01em;
+  background: hsl(var(--background));
+  color: hsl(var(--foreground));
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+::selection { background: hsl(var(--foreground) / .12); }
+img, svg { display: block; max-width: 100%; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+a { color: inherit; }
+ul, ol { list-style: none; padding: 0; }
+:focus-visible { outline: 2px solid hsl(var(--ring)); outline-offset: 2px; border-radius: 4px; }
+
+/* 细滚动条 */
+* { scrollbar-width: thin; scrollbar-color: hsl(var(--border)) transparent; }
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-thumb { background: hsl(var(--border)); border-radius: 999px; }
+*::-webkit-scrollbar-track { background: transparent; }
+
+.skip-link {
+  position: fixed; top: -100px; left: var(--space-4); z-index: 100;
+  padding: var(--space-2) var(--space-4); border-radius: var(--radius);
+  background: hsl(var(--primary)); color: hsl(var(--primary-foreground));
+  font-size: var(--text-sm); font-weight: 500; text-decoration: none;
+  transition: top var(--dur-fast) var(--ease-out);
+}
+.skip-link:focus { top: var(--space-3); }
+
+/* ============================================================
+   Header
+   ============================================================ */
+.site-header {
+  position: sticky; top: 0; z-index: 40;
+  height: 56px;
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: 0 var(--space-5);
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--background) / .85);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+}
+.brand { display: flex; align-items: center; gap: var(--space-2); text-decoration: none; min-width: 0; }
+.brand-mark {
+  width: 28px; height: 28px; flex: none;
+  display: grid; place-items: center;
+  border: 1px solid hsl(var(--border)); border-radius: 8px;
+  background: hsl(var(--secondary));
+}
+.brand-name { font-family: var(--font-serif); font-style: italic; font-size: var(--text-xl); line-height: 1; letter-spacing: .01em; }
+.brand-sub { font-family: var(--font-mono); font-size: var(--text-xs); color: hsl(var(--muted-foreground)); letter-spacing: .06em; }
+.header-nav { display: none; gap: var(--space-1); margin-left: var(--space-4); }
+.header-spacer { flex: 1; }
+.header-actions { display: flex; align-items: center; gap: var(--space-1); }
+
+@media (min-width: 1024px) {
+  .header-nav { display: flex; }
+}
+
+/* 按钮体系（shadcn 风格） */
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: var(--space-2);
+  height: 36px; padding: 0 var(--space-4);
+  border-radius: var(--radius);
+  font-size: var(--text-sm); font-weight: 500; white-space: nowrap;
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out),
+              border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out),
+              transform var(--dur-fast) var(--ease-out);
+}
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .5; pointer-events: none; }
+.btn-default { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); box-shadow: var(--shadow-1); }
+.btn-default:hover { background: hsl(var(--primary) / .9); }
+.btn-secondary { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+.btn-secondary:hover { background: hsl(var(--secondary) / .7); }
+.btn-outline { border: 1px solid hsl(var(--border)); background: hsl(var(--background)); }
+.btn-outline:hover { background: hsl(var(--accent)); }
+.btn-ghost:hover { background: hsl(var(--accent)); }
+.btn-icon { width: 36px; padding: 0; }
+.btn svg { width: 16px; height: 16px; flex: none; }
+
+.kbd {
+  font-family: var(--font-mono); font-size: var(--text-xs);
+  min-width: 20px; height: 20px; padding: 0 5px;
+  display: inline-flex; align-items: center; justify-content: center;
+  border: 1px solid hsl(var(--border)); border-radius: 6px;
+  background: hsl(var(--muted)); color: hsl(var(--muted-foreground));
+}
+
+/* 搜索触发器 */
+.search-trigger {
+  display: flex; align-items: center; gap: var(--space-2);
+  height: 36px; width: 220px; padding: 0 var(--space-3);
+  border: 1px solid hsl(var(--input)); border-radius: var(--radius);
+  background: hsl(var(--muted) / .6);
+  color: hsl(var(--muted-foreground)); font-size: var(--text-sm);
+  transition: border-color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.search-trigger:hover { background: hsl(var(--muted)); }
+.search-trigger svg { width: 15px; height: 15px; }
+.search-trigger .kbd { margin-left: auto; }
+@media (max-width: 1023px) {
+  .search-trigger { width: auto; }
+  .search-trigger span, .search-trigger .kbd { display: none; }
+}
+
+/* 徽章 */
+.badge {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 2px var(--space-2); border-radius: 999px;
+  font-size: var(--text-xs); font-weight: 500; line-height: 1.4;
+  border: 1px solid transparent; white-space: nowrap;
+}
+.badge-secondary { background: hsl(var(--secondary)); color: hsl(var(--secondary-foreground)); }
+.badge-outline { border-color: hsl(var(--border)); color: hsl(var(--muted-foreground)); font-family: var(--font-mono); font-size: 11px; letter-spacing: .04em; }
+.badge-new { background: hsl(var(--amber-soft)); color: hsl(var(--amber)); border-color: hsl(var(--amber) / .25); }
+.badge .dot { width: 7px; height: 7px; border-radius: 999px; background: hsl(var(--green)); flex: none; }
+
+/* 主题切换按钮图标互斥 */
+[data-theme="light"] .icon-moon, [data-theme="dark"] .icon-sun { display: none; }
+
+/* 阅读进度 */
+.progress-track { position: absolute; left: 0; right: 0; bottom: -1px; height: 2px; }
+#progress { height: 100%; width: 0; background: hsl(var(--foreground)); transition: width 80ms linear; }
+
+/* ============================================================
+   Layout
+   ============================================================ */
+.layout {
+  max-width: 88rem; margin-inline: auto;
+  display: grid; grid-template-columns: 16rem minmax(0, 1fr);
+  padding-inline: var(--space-5);
+}
+@media (min-width: 1280px) {
+  .layout { grid-template-columns: 16rem minmax(0, 1fr) 14.5rem; column-gap: var(--space-6); }
+}
+main { min-width: 0; padding-block: var(--space-6) var(--space-9); }
+
+/* ============================================================
+   Sidebar
+   ============================================================ */
+.sidebar {
+  position: fixed; inset: 0 auto 0 0; z-index: 60;
+  width: 17rem; padding: var(--space-5);
+  background: hsl(var(--background));
+  border-right: 1px solid hsl(var(--border));
+  overflow-y: auto;
+  transform: translateX(-100%);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.sidebar.open { transform: none; box-shadow: var(--shadow-3); }
+.sidebar-head { display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); }
+.sidebar-close { display: grid; place-items: center; width: 36px; height: 36px; border-radius: var(--radius); }
+.sidebar-close:hover { background: hsl(var(--accent)); }
+.sidebar-close svg { width: 18px; height: 18px; }
+
+.nav-group + .nav-group { margin-top: var(--space-6); }
+.nav-label {
+  display: flex; align-items: center; gap: var(--space-2);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .08em; color: hsl(var(--muted-foreground));
+  text-transform: uppercase;
+  padding-bottom: var(--space-2); margin-bottom: var(--space-1);
+  border-bottom: 1px solid hsl(var(--border));
+}
+.nav-num { color: hsl(var(--foreground) / .35); }
+.nav-link {
+  position: relative; display: flex; align-items: center; justify-content: space-between;
+  min-height: 36px; padding: var(--space-1) var(--space-3);
+  border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm); color: hsl(var(--muted-foreground)); text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out), background-color var(--dur-fast) var(--ease-out);
+}
+.nav-link:hover { color: hsl(var(--foreground)); background: hsl(var(--accent)); }
+.nav-link.is-active { color: hsl(var(--foreground)); font-weight: 500; background: hsl(var(--accent)); }
+.nav-link.is-active::before {
+  content: ""; position: absolute; left: -var(--space-5); top: 50%; translate: 0 -50%;
+  width: 2px; height: 18px; border-radius: 2px; background: hsl(var(--foreground));
+}
+.nav-link .badge-new { flex: none; }
+
+@media (min-width: 1024px) {
+  .sidebar {
+    position: sticky; top: 56px; z-index: 1;
+    width: auto; height: calc(100dvh - 56px);
+    padding: var(--space-7) var(--space-2) var(--space-8) 0;
+    border-right: 0; transform: none; box-shadow: none;
+    grid-column: 1;
+  }
+  .sidebar-head { display: none; }
+  .nav-link.is-active::before { left: 0; }
+}
+
+/* 抽屉遮罩 */
+.overlay {
+  position: fixed; inset: 0; z-index: 50;
+  background: hsl(240 10% 3.9% / .5);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.overlay.show { opacity: 1; pointer-events: auto; }
+@media (min-width: 1024px) { .overlay { display: none; } }
+
+/* ============================================================
+   Hero（编辑感非对称构成）
+   ============================================================ */
+.hero {
+  position: relative;
+  display: grid; gap: var(--space-7);
+  padding-block: var(--space-7) var(--space-8);
+}
+.hero::before {
+  content: ""; position: absolute; inset: -20% -10% auto -10%; height: 130%; z-index: -1;
+  background:
+    radial-gradient(42rem 22rem at 18% 0%, hsl(var(--foreground) / .05), transparent 70%),
+    linear-gradient(hsl(var(--border) / .55) 1px, transparent 1px),
+    linear-gradient(90deg, hsl(var(--border) / .55) 1px, transparent 1px);
+  background-size: auto, 56px 56px, 56px 56px;
+  -webkit-mask-image: radial-gradient(38rem 20rem at 20% 0%, #000 25%, transparent 75%);
+  mask-image: radial-gradient(38rem 20rem at 20% 0%, #000 25%, transparent 75%);
+}
+.hero-main { min-width: 0; }
+
+/* 面包屑 */
+.breadcrumb { display: flex; align-items: center; gap: var(--space-2); font-size: var(--text-sm); color: hsl(var(--muted-foreground)); margin-bottom: var(--space-4); }
+.breadcrumb a { text-decoration: none; }
+.breadcrumb a:hover { color: hsl(var(--foreground)); }
+.breadcrumb svg { width: 14px; height: 14px; flex: none; opacity: .6; }
+.breadcrumb [aria-current] { color: hsl(var(--foreground)); font-weight: 500; }
+
+.hero-title {
+  font-size: clamp(2.5rem, 6.5vw, var(--text-6xl));
+  font-weight: 700; line-height: 1.04; letter-spacing: -.025em;
+  margin-bottom: var(--space-5);
+}
+.hero-title .serif { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: -.01em; }
+.hero-title .en { font-family: var(--font-serif); font-style: italic; font-weight: 400; letter-spacing: 0; }
+.hero-desc { max-width: 36rem; font-size: var(--text-lg); line-height: 1.8; color: hsl(var(--muted-foreground)); }
+.hero-desc code { font-size: .9em; }
+.hero-meta {
+  display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-4);
+  margin-top: var(--space-6); padding-top: var(--space-5);
+  border-top: 1px solid hsl(var(--border));
+  font-family: var(--font-mono); font-size: var(--text-xs); letter-spacing: .05em;
+  color: hsl(var(--muted-foreground)); font-variant-numeric: tabular-nums;
+}
+.hero-meta b { color: hsl(var(--foreground)); font-weight: 500; }
+
+/* 索引卡（记忆点：压住 hero 边缘的浮起卡片） */
+.index-card {
+  position: relative; align-self: start;
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  background: hsl(var(--card)); box-shadow: var(--shadow-2);
+  padding: var(--space-5);
+}
+.index-card .corner-tag {
+  position: absolute; top: -11px; left: var(--space-4);
+  padding: 2px var(--space-2); border-radius: 999px;
+  background: hsl(var(--primary)); color: hsl(var(--primary-foreground));
+  font-family: var(--font-mono); font-size: 10px; font-weight: 600; letter-spacing: .12em;
+}
+.index-card h2 { font-size: var(--text-sm); font-weight: 600; margin-bottom: var(--space-4); }
+.index-list li + li { border-top: 1px solid hsl(var(--border)); }
+.index-list a {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) 0; min-height: 36px;
+  font-size: var(--text-sm); color: hsl(var(--muted-foreground)); text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out);
+}
+.index-list a:hover { color: hsl(var(--foreground)); }
+.index-list .n { font-family: var(--font-mono); font-size: 11px; color: hsl(var(--foreground) / .35); font-variant-numeric: tabular-nums; }
+.index-list svg { width: 14px; height: 14px; margin-left: auto; opacity: 0; translate: -4px 0; transition: opacity var(--dur-fast) var(--ease-out), translate var(--dur-fast) var(--ease-out); }
+.index-list a:hover svg { opacity: .6; translate: 0 0; }
+
+@media (min-width: 1024px) {
+  .hero { grid-template-columns: minmax(0, 1fr) 16rem; column-gap: var(--space-7); align-items: start; }
+  .index-card { margin-top: 8.5rem; }
+}
+@media (max-width: 1023px) {
+  .index-card .corner-tag { top: -11px; }
+  .index-list { display: grid; grid-template-columns: 1fr 1fr; }
+  .index-list li:nth-child(odd) { border-right: 1px solid hsl(var(--border)); }
+}
+
+/* ============================================================
+   正文排版
+   ============================================================ */
+.content { max-width: 48rem; }
+.content section + section { margin-top: var(--space-8); }
+.content h2 {
+  font-size: var(--text-3xl); font-weight: 650; letter-spacing: -.02em; line-height: 1.2;
+  padding-bottom: var(--space-3); margin-bottom: var(--space-5);
+  border-bottom: 1px solid hsl(var(--border));
+  scroll-margin-top: 84px;
+  display: flex; align-items: baseline; gap: var(--space-3);
+}
+.content h2 .no { font-family: var(--font-mono); font-size: var(--text-sm); font-weight: 500; color: hsl(var(--foreground) / .35); font-variant-numeric: tabular-nums; }
+.content h3 { font-size: var(--text-xl); font-weight: 600; letter-spacing: -.01em; margin: var(--space-7) 0 var(--space-3); scroll-margin-top: 84px; }
+.content p { margin-bottom: var(--space-4); }
+.content p code, .content li code { font-size: .875em; }
+.content ul.bullets { margin: var(--space-4) 0; display: grid; gap: var(--space-2); }
+.content ul.bullets li { position: relative; padding-left: var(--space-5); color: hsl(var(--muted-foreground)); }
+.content ul.bullets li::before { content: ""; position: absolute; left: 6px; top: .68em; width: 4px; height: 4px; border-radius: 999px; background: hsl(var(--foreground) / .45); }
+.content ul.bullets strong { color: hsl(var(--foreground)); font-weight: 550; }
+.prose-link {
+  color: hsl(var(--foreground)); text-decoration: underline;
+  text-decoration-color: hsl(var(--foreground) / .3);
+  text-underline-offset: 4px; text-decoration-thickness: 1px;
+  transition: text-decoration-color var(--dur-fast) var(--ease-out);
+}
+.prose-link:hover { text-decoration-color: hsl(var(--foreground)); }
+
+/* 行内代码 */
+:not(pre) > code {
+  font-family: var(--font-mono); font-size: .875em;
+  padding: .15em .4em; border-radius: 5px;
+  background: hsl(var(--muted)); border: 1px solid hsl(var(--border));
+  color: hsl(var(--foreground)); white-space: nowrap;
+}
+
+/* 代码块（带红绿灯、语言标签、行号、复制） */
+.code-block {
+  margin: var(--space-5) 0;
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  background: hsl(var(--card)); overflow: hidden;
+}
+.code-head {
+  display: flex; align-items: center; gap: var(--space-3);
+  padding: var(--space-2) var(--space-3) var(--space-2) var(--space-4);
+  border-bottom: 1px solid hsl(var(--border));
+  background: hsl(var(--muted) / .5);
+}
+.dots { display: flex; gap: 6px; }
+.dots i { width: 10px; height: 10px; border-radius: 999px; background: hsl(var(--border)); }
+.dots i:first-child { background: hsl(8 80% 60% / .55); }
+.dots i:nth-child(2) { background: hsl(45 90% 50% / .5); }
+.dots i:nth-child(3) { background: hsl(142 60% 45% / .45); }
+.code-lang { font-family: var(--font-mono); font-size: 11px; letter-spacing: .06em; color: hsl(var(--muted-foreground)); text-transform: uppercase; }
+.code-copy {
+  margin-left: auto; display: flex; align-items: center; gap: 6px;
+  height: 28px; padding: 0 var(--space-2); border-radius: 6px;
+  font-size: var(--text-xs); color: hsl(var(--muted-foreground));
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out);
+}
+.code-copy:hover { background: hsl(var(--accent)); color: hsl(var(--foreground)); }
+.code-copy svg { width: 13px; height: 13px; }
+.code-copy.copied { color: hsl(var(--green)); }
+.code-block pre {
+  padding: var(--space-4) 0; overflow-x: auto;
+  font-family: var(--font-mono); font-size: var(--text-sm); line-height: 1.75;
+  background: hsl(var(--background));
+}
+.code-block ol { counter-reset: line; }
+.code-block li { counter-increment: line; position: relative; padding-left: var(--space-7); padding-right: var(--space-5); white-space: pre; }
+.code-block li::before {
+  content: counter(line);
+  position: absolute; left: 0; width: var(--space-7);
+  text-align: center; color: hsl(var(--foreground) / .25);
+  font-size: var(--text-xs); user-select: none;
+}
+.tok-c { color: hsl(var(--tok-c)); font-style: italic; }
+.tok-k { color: hsl(var(--tok-k)); font-weight: 600; }
+.tok-s { color: hsl(var(--tok-s)); }
+.tok-f { color: hsl(var(--tok-f)); }
+.tok-n { color: hsl(var(--tok-n)); }
+.tok-p { color: hsl(var(--muted-foreground)); }
+
+/* Callout */
+.callout {
+  display: flex; gap: var(--space-3);
+  margin: var(--space-5) 0; padding: var(--space-4);
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  background: hsl(var(--muted) / .45);
+  font-size: var(--text-sm); line-height: 1.7;
+}
+.callout > svg { width: 17px; height: 17px; flex: none; margin-top: 4px; }
+.callout strong { display: block; font-weight: 600; margin-bottom: 2px; }
+.callout p { margin: 0; color: hsl(var(--muted-foreground)); }
+.callout p + p { margin-top: var(--space-2); }
+.callout-warning { border-color: hsl(var(--amber) / .35); background: hsl(var(--amber-soft) / .55); }
+.callout-warning > svg { color: hsl(var(--amber)); }
+.callout-note > svg { color: hsl(var(--muted-foreground)); }
+.callout-tip { border-color: hsl(var(--green) / .3); background: hsl(var(--green) / .06); }
+.callout-tip > svg { color: hsl(var(--green)); }
+
+/* 表格 */
+.table-wrap { margin: var(--space-5) 0; border: 1px solid hsl(var(--border)); border-radius: var(--radius); overflow-x: auto; }
+table { width: 100%; border-collapse: collapse; font-size: var(--text-sm); }
+th {
+  text-align: left; padding: var(--space-3) var(--space-4);
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .08em; text-transform: uppercase; color: hsl(var(--muted-foreground));
+  border-bottom: 1px solid hsl(var(--border)); background: hsl(var(--muted) / .5);
+  white-space: nowrap;
+}
+td { padding: var(--space-3) var(--space-4); border-bottom: 1px solid hsl(var(--border)); vertical-align: top; }
+tr:last-child td { border-bottom: 0; }
+td:first-child { font-family: var(--font-mono); font-size: var(--text-xs); white-space: nowrap; color: hsl(var(--foreground)); }
+
+/* Steps */
+.steps { margin: var(--space-5) 0; display: grid; gap: var(--space-5); counter-reset: step; }
+.steps li { position: relative; padding-left: var(--space-7); counter-increment: step; }
+.steps li::before {
+  content: counter(step, decimal-leading-zero);
+  position: absolute; left: 0; top: 2px;
+  width: 36px; height: 24px; display: grid; place-items: center;
+  border: 1px solid hsl(var(--border)); border-radius: 999px;
+  font-family: var(--font-mono); font-size: 11px; color: hsl(var(--muted-foreground));
+  background: hsl(var(--background));
+}
+.steps h4 { font-size: var(--text-base); font-weight: 600; margin-bottom: var(--space-1); min-height: 28px; display: flex; align-items: center; }
+.steps p { color: hsl(var(--muted-foreground)); font-size: var(--text-sm); margin: 0; }
+
+/* Tabs（shadcn 分段控件风格） */
+.tabs { margin: var(--space-5) 0; }
+.tabs-list { display: inline-flex; gap: 2px; padding: 3px; border-radius: var(--radius); background: hsl(var(--muted)); }
+.tabs-trigger {
+  display: inline-flex; align-items: center; gap: 6px;
+  height: 30px; padding: 0 var(--space-3); border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm); font-weight: 500; color: hsl(var(--muted-foreground));
+  transition: background-color var(--dur-fast) var(--ease-out), color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.tabs-trigger:hover { color: hsl(var(--foreground)); }
+.tabs-trigger[aria-selected="true"] { background: hsl(var(--card)); color: hsl(var(--foreground)); box-shadow: var(--shadow-1); }
+.tabs-panel { margin-top: var(--space-4); }
+.tabs-panel[hidden] { display: none; }
+
+/* 特性卡（错落栅格：长短不一，align-items: start） */
+.feature-grid { display: grid; gap: var(--space-4); margin: var(--space-5) 0; }
+@media (min-width: 640px) { .feature-grid { grid-template-columns: 1fr 1fr; } }
+.feature-card {
+  border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  background: hsl(var(--card)); padding: var(--space-5);
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out);
+}
+.feature-card:hover { border-color: hsl(var(--foreground) / .22); box-shadow: var(--shadow-2); transform: translateY(-2px); }
+.feature-card .icon {
+  width: 34px; height: 34px; display: grid; place-items: center;
+  border: 1px solid hsl(var(--border)); border-radius: 9px;
+  background: hsl(var(--secondary)); margin-bottom: var(--space-4);
+}
+.feature-card .icon svg { width: 16px; height: 16px; }
+.feature-card h3 { font-size: var(--text-base); font-weight: 600; margin: 0 0 var(--space-2); }
+.feature-card p { font-size: var(--text-sm); color: hsl(var(--muted-foreground)); margin: 0; }
+.feature-card p + p { margin-top: var(--space-2); }
+
+/* 下一步 doc 卡 */
+.doc-grid { display: grid; gap: var(--space-4); margin-top: var(--space-5); }
+@media (min-width: 640px) { .doc-grid { grid-template-columns: repeat(3, 1fr); } }
+.doc-card {
+  display: flex; flex-direction: column; gap: var(--space-2);
+  padding: var(--space-4); border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  text-decoration: none; background: hsl(var(--card));
+  transition: border-color var(--dur-base) var(--ease-out), box-shadow var(--dur-base) var(--ease-out);
+}
+.doc-card:hover { border-color: hsl(var(--foreground) / .3); box-shadow: var(--shadow-1); }
+.doc-card .row { display: flex; align-items: center; gap: var(--space-2); font-weight: 600; font-size: var(--text-sm); }
+.doc-card svg.lead { width: 15px; height: 15px; color: hsl(var(--muted-foreground)); }
+.doc-card svg.arrow { width: 15px; height: 15px; margin-left: auto; color: hsl(var(--muted-foreground)); transition: translate var(--dur-base) var(--ease-out); }
+.doc-card:hover svg.arrow { translate: 3px 0; color: hsl(var(--foreground)); }
+.doc-card p { font-size: var(--text-xs); color: hsl(var(--muted-foreground)); line-height: 1.6; margin: 0; }
+
+/* 上下页 */
+.pager { display: grid; gap: var(--space-4); margin-top: var(--space-8); }
+@media (min-width: 640px) { .pager { grid-template-columns: 1fr 1fr; } }
+.pager-card {
+  display: flex; flex-direction: column; gap: 2px;
+  padding: var(--space-4); border: 1px solid hsl(var(--border)); border-radius: var(--radius);
+  text-decoration: none; background: hsl(var(--card));
+  transition: border-color var(--dur-fast) var(--ease-out), box-shadow var(--dur-fast) var(--ease-out);
+}
+.pager-card:hover { border-color: hsl(var(--foreground) / .3); box-shadow: var(--shadow-1); }
+.pager-card span { font-family: var(--font-mono); font-size: 11px; letter-spacing: .08em; color: hsl(var(--muted-foreground)); text-transform: uppercase; }
+.pager-card b { font-size: var(--text-base); font-weight: 600; }
+.pager-card.next { text-align: right; align-items: flex-end; }
+.pager-card.placeholder { border-style: dashed; color: hsl(var(--muted-foreground)); pointer-events: none; opacity: .6; }
+
+/* 页脚 */
+.doc-footer { margin-top: var(--space-8); padding-top: var(--space-5); border-top: 1px solid hsl(var(--border)); }
+.doc-footer .row { display: flex; flex-wrap: wrap; align-items: center; gap: var(--space-2) var(--space-5); font-size: var(--text-sm); color: hsl(var(--muted-foreground)); }
+.doc-footer a { display: inline-flex; align-items: center; gap: 6px; text-decoration: none; }
+.doc-footer a:hover { color: hsl(var(--foreground)); }
+.doc-footer svg { width: 14px; height: 14px; }
+.doc-footer .copyright { margin-top: var(--space-3); font-size: var(--text-xs); font-family: var(--font-mono); letter-spacing: .04em; color: hsl(var(--muted-foreground) / .8); }
+
+/* ============================================================
+   TOC（右侧目录）
+   ============================================================ */
+.toc { display: none; }
+@media (min-width: 1280px) {
+  .toc {
+    display: block; position: sticky; top: 56px;
+    height: calc(100dvh - 56px); overflow-y: auto;
+    padding-block: var(--space-7) var(--space-8);
+    grid-column: 3;
+  }
+}
+.toc-title {
+  font-family: var(--font-mono); font-size: 11px; font-weight: 500;
+  letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--muted-foreground));
+  margin-bottom: var(--space-3);
+}
+.toc-list { display: grid; gap: 1px; border-left: 1px solid hsl(var(--border)); }
+.toc-list a {
+  display: block; padding: 5px var(--space-3); margin-left: -1px;
+  border-left: 2px solid transparent;
+  font-size: var(--text-sm); color: hsl(var(--muted-foreground)); text-decoration: none;
+  transition: color var(--dur-fast) var(--ease-out), border-color var(--dur-fast) var(--ease-out);
+}
+.toc-list a:hover { color: hsl(var(--foreground)); }
+.toc-list a.is-active { color: hsl(var(--foreground)); font-weight: 500; border-left-color: hsl(var(--foreground)); }
+.toc-mobile { margin-top: var(--space-7); border: 1px solid hsl(var(--border)); border-radius: var(--radius); }
+.toc-mobile summary {
+  display: flex; align-items: center; gap: var(--space-2);
+  min-height: 44px; padding: 0 var(--space-4); cursor: pointer;
+  font-family: var(--font-mono); font-size: 11px; letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--muted-foreground));
+  list-style: none;
+}
+.toc-mobile summary::-webkit-details-marker { display: none; }
+.toc-mobile summary::after { content: ""; width: 7px; height: 7px; border-right: 1.5px solid currentColor; border-bottom: 1.5px solid currentColor; rotate: 45deg; margin-left: auto; transition: rotate var(--dur-fast) var(--ease-out); }
+.toc-mobile[open] summary::after { rotate: 225deg; }
+.toc-mobile ul { padding: var(--space-1) var(--space-4) var(--space-4); }
+.toc-mobile a { display: block; padding: var(--space-2) 0; font-size: var(--text-sm); color: hsl(var(--muted-foreground)); text-decoration: none; }
+.toc-mobile a:hover { color: hsl(var(--foreground)); }
+@media (min-width: 1280px) { .toc-mobile { display: none; } }
+
+/* ============================================================
+   Command 搜索面板
+   ============================================================ */
+.cmdk {
+  position: fixed; inset: 0; z-index: 70;
+  display: grid; place-items: start center;
+  padding: var(--space-7) var(--space-4);
+  background: hsl(240 10% 3.9% / .5);
+  opacity: 0; pointer-events: none;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+.cmdk.show { opacity: 1; pointer-events: auto; }
+.cmdk-panel {
+  width: 100%; max-width: 34rem;
+  border: 1px solid hsl(var(--border)); border-radius: 12px;
+  background: hsl(var(--popover)); box-shadow: var(--shadow-3);
+  overflow: hidden;
+  transform: translateY(-8px) scale(.98);
+  transition: transform var(--dur-base) var(--ease-out);
+}
+.cmdk.show .cmdk-panel { transform: none; }
+.cmdk-input-row { display: flex; align-items: center; gap: var(--space-3); padding: 0 var(--space-4); border-bottom: 1px solid hsl(var(--border)); }
+.cmdk-input-row svg { width: 16px; height: 16px; color: hsl(var(--muted-foreground)); flex: none; }
+#cmdk-input { flex: 1; height: 48px; border: 0; outline: 0; background: none; font: inherit; font-size: var(--text-sm); color: hsl(var(--foreground)); }
+#cmdk-input::placeholder { color: hsl(var(--muted-foreground)); }
+.cmdk-list { max-height: min(24rem, 60dvh); overflow-y: auto; padding: var(--space-2); }
+.cmdk-group { padding: var(--space-2) var(--space-2) var(--space-1); font-family: var(--font-mono); font-size: 10px; letter-spacing: .1em; text-transform: uppercase; color: hsl(var(--muted-foreground) / .8); }
+.cmdk-item {
+  display: flex; align-items: center; gap: var(--space-3); width: 100%;
+  min-height: 40px; padding: var(--space-1) var(--space-3); border-radius: calc(var(--radius) - 2px);
+  font-size: var(--text-sm); text-align: left; color: hsl(var(--foreground));
+}
+.cmdk-item svg { width: 15px; height: 15px; color: hsl(var(--muted-foreground)); flex: none; }
+.cmdk-item .hint { margin-left: auto; font-family: var(--font-mono); font-size: 11px; color: hsl(var(--muted-foreground) / .7); }
+.cmdk-item.is-active { background: hsl(var(--accent)); }
+.cmdk-empty { padding: var(--space-6) var(--space-4); text-align: center; font-size: var(--text-sm); color: hsl(var(--muted-foreground)); }
+.cmdk-footer { display: flex; align-items: center; gap: var(--space-4); padding: var(--space-2) var(--space-4); border-top: 1px solid hsl(var(--border)); font-size: 11px; color: hsl(var(--muted-foreground)); }
+@media (max-width: 640px) {
+  .cmdk { padding: var(--space-4); place-items: stretch; align-content: start; }
+}
+
+/* ============================================================
+   动效：入场序列 + 滚动揭示
+   ============================================================ */
+.reveal { opacity: 0; transform: translateY(16px); }
+.reveal.in { opacity: 1; transform: none; transition: opacity var(--dur-base) var(--ease-out), transform var(--dur-base) var(--ease-out); }
+.hero .reveal:nth-child(1) { transition-delay: 0ms; }
+.hero .reveal:nth-child(2) { transition-delay: 80ms; }
+.hero .reveal:nth-child(3) { transition-delay: 160ms; }
+.hero .reveal:nth-child(4) { transition-delay: 240ms; }
+
+/* 状态点呼吸（克制） */
+.status-dot { position: relative; }
+.status-dot::after {
+  content: ""; position: absolute; inset: -4px; border-radius: 999px;
+  border: 1px solid hsl(var(--green) / .5);
+  animation: pulse 2.4s var(--ease-out) infinite;
+}
+@keyframes pulse { from { opacity: 1; scale: .6; } to { opacity: 0; scale: 1.5; } }
+
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .reveal, .hero .reveal { opacity: 1; transform: none; transition: none; }
+  .reveal.in { transition: none; }
+  .status-dot::after { animation: none; }
+  .index-card, .cmdk-panel, .sidebar, .overlay, .cmdk { transition: none; }
+  .feature-card:hover, .doc-card:hover { transform: none; }
+}
+</style>
+</head>
+<body>
+<a class="skip-link" href="#main">跳到主内容</a>
+
+<!-- ==================== Header ==================== -->
+<header class="site-header">
+  <button class="btn btn-ghost btn-icon" id="menu-btn" aria-label="打开导航菜单" aria-expanded="false" style="margin-left:-8px">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="4" y1="6" x2="20" y2="6"/><line x1="4" y1="12" x2="20" y2="12"/><line x1="4" y1="18" x2="20" y2="18"/></svg>
+  </button>
+  <a class="brand" href="#" aria-label="Sentinel 首页">
+    <span class="brand-mark" aria-hidden="true">
+      <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z"/><path d="m9 12 2 2 4-4"/></svg>
+    </span>
+    <span class="brand-name">Sentinel</span>
+    <span class="brand-sub">IAM</span>
+  </a>
+  <span class="badge badge-outline" style="margin-left:4px">v2.4.0</span>
+  <nav class="header-nav" aria-label="站点导航">
+    <a class="btn btn-ghost" href="#overview" style="color:hsl(var(--foreground))">文档</a>
+    <a class="btn btn-ghost" href="#quickstart">指南</a>
+    <a class="btn btn-ghost" href="#features">API</a>
+  </nav>
+  <div class="header-spacer"></div>
+  <div class="header-actions">
+    <button class="search-trigger" id="search-btn" aria-label="搜索文档">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <span>搜索文档</span>
+      <span class="kbd" aria-hidden="true">⌘K</span>
+    </button>
+    <button class="btn btn-ghost btn-icon" id="theme-toggle" aria-label="切换明暗主题">
+      <svg class="icon-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>
+      <svg class="icon-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 3a6 6 0 0 0 9 9 9 9 0 1 1-9-9Z"/></svg>
+    </button>
+    <a class="btn btn-ghost btn-icon" href="https://github.com" target="_blank" rel="noopener" aria-label="GitHub 仓库">
+      <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/></svg>
+    </a>
+  </div>
+  <div class="progress-track" aria-hidden="true"><div id="progress"></div></div>
+</header>
+
+<div class="overlay" id="overlay" hidden></div>
+
+<div class="layout">
+  <!-- ==================== Sidebar ==================== -->
+  <aside class="sidebar" id="sidebar" aria-label="文档导航">
+    <div class="sidebar-head">
+      <span class="brand-name" style="font-size:18px">Sentinel</span>
+      <button class="sidebar-close" id="drawer-close" aria-label="关闭导航菜单">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <nav>
+      <div class="nav-group">
+        <p class="nav-label"><span class="nav-num">01</span>开始</p>
+        <ul>
+          <li><a class="nav-link is-active" href="#" aria-current="page">简介</a></li>
+          <li><a class="nav-link" href="#quickstart">快速开始</a></li>
+          <li><a class="nav-link" href="#quickstart">安装配置</a></li>
+        </ul>
+      </div>
+      <div class="nav-group">
+        <p class="nav-label"><span class="nav-num">02</span>核心概念</p>
+        <ul>
+          <li><a class="nav-link" href="#">领域模型</a></li>
+          <li><a class="nav-link" href="#">权限模型</a></li>
+          <li><a class="nav-link" href="#">多租户 <span class="badge badge-new">New</span></a></li>
+        </ul>
+      </div>
+      <div class="nav-group">
+        <p class="nav-label"><span class="nav-num">03</span>架构</p>
+        <ul>
+          <li><a class="nav-link" href="#architecture">模块边界</a></li>
+          <li><a class="nav-link" href="#">CQRS 模式</a></li>
+          <li><a class="nav-link" href="#">数据流</a></li>
+        </ul>
+      </div>
+      <div class="nav-group">
+        <p class="nav-label"><span class="nav-num">04</span>指南</p>
+        <ul>
+          <li><a class="nav-link" href="#">缓存策略</a></li>
+          <li><a class="nav-link" href="#">错误处理</a></li>
+          <li><a class="nav-link" href="#">部署运维</a></li>
+        </ul>
+      </div>
+      <div class="nav-group">
+        <p class="nav-label"><span class="nav-num">05</span>API 参考</p>
+        <ul>
+          <li><a class="nav-link" href="#">REST API</a></li>
+          <li><a class="nav-link" href="#">错误码</a></li>
+          <li><a class="nav-link" href="#">CLI</a></li>
+        </ul>
+      </div>
+    </nav>
+  </aside>
+
+  <!-- ==================== Main ==================== -->
+  <main id="main">
+    <div class="content" id="content">
+      <!-- Hero -->
+      <section class="hero" aria-labelledby="page-title">
+        <div class="hero-main">
+          <nav class="breadcrumb reveal" aria-label="面包屑">
+            <a href="#">文档</a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+            <a href="#">开始</a>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg>
+            <span aria-current="page">简介</span>
+          </nav>
+          <h1 class="hero-title reveal" id="page-title">构建可审计的<br><span class="serif">Sentinel</span> <span class="en">access control</span></h1>
+          <p class="hero-desc reveal">Sentinel 是一套面向 Rust 服务端的身份与访问管理参考架构：以领域驱动设计划分模块边界，以 CQRS 分离读写路径，用 PostgreSQL 承载领域状态、Redis 加速读模型。本档案记录它的架构决策、领域模型与接口约定。</p>
+          <div class="hero-meta reveal">
+            <span>版本 <b>v2.4.0</b></span>
+            <span>更新于 <b>2025-01-18</b></span>
+            <span>许可 <b>Apache-2.0</b></span>
+            <span style="display:inline-flex;align-items:center;gap:6px"><span class="status-dot" style="width:7px;height:7px;border-radius:999px;background:hsl(var(--green))"></span>状态 <b>稳定</b></span>
+          </div>
+        </div>
+        <!-- 索引卡：压住 hero 边缘的浮起卡片 -->
+        <aside class="index-card reveal" aria-label="本页索引">
+          <span class="corner-tag">INDEX</span>
+          <h2>本页内容</h2>
+          <ul class="index-list">
+            <li><a href="#overview"><span class="n">01</span>概览<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#principles"><span class="n">02</span>设计原则<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#architecture"><span class="n">03</span>架构总览<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#quickstart"><span class="n">04</span>快速上手<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#features"><span class="n">05</span>核心特性<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></a></li>
+            <li><a href="#next-steps"><span class="n">06</span>下一步<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="m9 18 6-6-6-6"/></svg></a></li>
+          </ul>
+        </aside>
+      </section>
+
+      <!-- 01 概览 -->
+      <section id="overview">
+        <h2><span class="no">01</span>概览</h2>
+        <p>访问控制是后台系统里最早长出、也最容易腐烂的一块。权限判断散落在各个控制器里，角色与菜单的关系只存在于某位早期成员的心中，等新人接手时，没人敢删除任何一行代码。</p>
+        <p>Sentinel 把这件事当作一个正式的架构问题来对待：用户、角色、权限、组织、字典各自成为独立的领域模块，模块之间只通过显式声明的端口通信。应用状态由 <code>PgPool</code> 持久化，读模型投影同步写入 <code>RedisPool</code>，两者在 <code>AppState</code> 中组装，由 <code>server</code> crate 统一接入 HTTP 层。</p>
+        <div class="callout callout-note">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4M12 8h.01"/></svg>
+          <div>
+            <strong>这份文档适合谁</strong>
+            <p>即将接入 Sentinel 的后端工程师，以及准备改造现有权限体系的架构师。如果你只想先跑起来，建议直接跳到<a class="prose-link" href="#quickstart">快速上手</a>。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 02 设计原则 -->
+      <section id="principles">
+        <h2><span class="no">02</span>设计原则</h2>
+        <p>四条原则贯穿整个仓库。它们不是口号，每一条都能在代码里找到对应的强制约束。</p>
+        <ol class="steps">
+          <li>
+            <h4>显式建模，拒绝隐式约定</h4>
+            <p>每个领域概念都有独立的新类型 ID 与聚合根，跨模块引用必须显式转换，不允许裸 <code>i64</code> 在系统里流浪。</p>
+          </li>
+          <li>
+            <h4>读写分离，各走各路</h4>
+            <p>命令经过领域模型保证不变量；查询绕过聚合直连读模型与缓存。两侧可以独立演进、独立优化、独立失效。</p>
+          </li>
+          <li>
+            <h4>模块自治，胜过统一抽象</h4>
+            <p>每个 crate 自带错误类型、ID 定义与接口转换。<code>shared</code> 只提供真正通用的基础设施，不制造上帝抽象。</p>
+          </li>
+          <li>
+            <h4>按需演进，不为未来买单</h4>
+            <p>审计、软删除、多租户、乐观锁在 <code>shared</code> 中预留位置，直到真实需求出现才落地实现。</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- 03 架构总览 -->
+      <section id="architecture">
+        <h2><span class="no">03</span>架构总览</h2>
+        <p>系统按模块化单体组织：五个 crate 平级协作，<code>server</code> 只做组装，不承载任何业务逻辑。每个业务 crate 内部分为 application / domain / infrastructure / presentation 四层，层间单向依赖。</p>
+        <figure class="code-block">
+          <div class="code-head">
+            <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+            <span class="code-lang">text</span>
+            <button class="code-copy" data-copy aria-label="复制代码">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+              <span>复制</span>
+            </button>
+          </div>
+          <pre><code><ol><li><span class="tok-c"># 仓库结构：依赖方向自上而下，模块之间禁止横向 import</span></li><li><span class="tok-f">sentinel/</span></li><li>├── <span class="tok-f">crates/</span></li><li>│   ├── <span class="tok-f">iam/</span>            <span class="tok-c"># 用户、角色、权限、授权判定</span></li><li>│   │   ├── <span class="tok-f">application/</span>    <span class="tok-c"># Command / Query handler</span></li><li>│   │   ├── <span class="tok-f">domain/</span>         <span class="tok-c"># 聚合、值对象、领域事件</span></li><li>│   │   ├── <span class="tok-f">infrastructure/</span> <span class="tok-c"># SQLx 仓储、Redis 投影</span></li><li>│   │   └── <span class="tok-f">presentation/</span>   <span class="tok-c"># Axum 路由、错误转换</span></li><li>│   ├── <span class="tok-f">org/</span>            <span class="tok-c"># 组织、岗位、成员关系</span></li><li>│   ├── <span class="tok-f">sys/</span>            <span class="tok-c"># 字典与字典项</span></li><li>│   ├── <span class="tok-f">server/</span>         <span class="tok-c"># 路由组装、中间件、启动</span></li><li>│   └── <span class="tok-f">shared/</span>         <span class="tok-c"># TypedId、时间等通用件</span></li><li>└── <span class="tok-f">migrations/</span></li></ol></code></pre>
+        </figure>
+        <div class="table-wrap">
+          <table>
+            <thead>
+              <tr><th>Crate</th><th>职责</th><th>关键抽象</th></tr>
+            </thead>
+            <tbody>
+              <tr><td>iam</td><td>账号、角色、权限与授权判定</td><td>User, Role, Permission, Policy</td></tr>
+              <tr><td>org</td><td>组织结构、岗位与成员关系</td><td>Organization, Position, Membership</td></tr>
+              <tr><td>sys</td><td>字典配置与枚举值管理</td><td>Dictionary, DictionaryItem</td></tr>
+              <tr><td>server</td><td>HTTP 组装、中间件与进程生命周期</td><td>Router, AppState</td></tr>
+              <tr><td>shared</td><td>跨模块通用基础设施（占位）</td><td>TypedId, Clock</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <div class="callout callout-warning">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/><path d="M12 9v4M12 17h.01"/></svg>
+          <div>
+            <strong>模块之间禁止横向依赖</strong>
+            <p>当 <code>iam</code> 需要组织信息时，通过 <code>org</code> 暴露的端口查询，而不是直接读取其内部表。这条约束由 CI 中的依赖检查强制执行。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 04 快速上手 -->
+      <section id="quickstart">
+        <h2><span class="no">04</span>快速上手</h2>
+        <p>三种安装方式任选其一。开发环境推荐容器方式，生产环境建议使用 Helm chart 部署。</p>
+        <div class="tabs" data-tabs>
+          <div class="tabs-list" role="tablist" aria-label="安装方式">
+            <button class="tabs-trigger" role="tab" aria-selected="true" aria-controls="panel-docker" id="tab-docker">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2.5a5.5 5.5 0 0 0-5.5 5.5v3H4a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-3a2 2 0 0 0-2-2h-2.5V8A5.5 5.5 0 0 0 12 2.5Z"/></svg>
+              Docker
+            </button>
+            <button class="tabs-trigger" role="tab" aria-selected="false" aria-controls="panel-cargo" id="tab-cargo" tabindex="-1">Cargo</button>
+            <button class="tabs-trigger" role="tab" aria-selected="false" aria-controls="panel-helm" id="tab-helm" tabindex="-1">Kubernetes</button>
+          </div>
+          <div class="tabs-panel" role="tabpanel" id="panel-docker" aria-labelledby="tab-docker">
+            <figure class="code-block">
+              <div class="code-head">
+                <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="code-lang">bash</span>
+                <button class="code-copy" data-copy aria-label="复制代码">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <span>复制</span>
+                </button>
+              </div>
+              <pre><code><ol><li><span class="tok-c"># 拉取镜像并启动，数据库使用容器内置的嵌入式实例</span></li><li>docker run -d --name sentinel \</li><li>  -p 8080:8080 \</li><li>  -e SENTINEL_DATABASE_URL=<span class="tok-s">"postgres://sentinel:sentinel@db:5432/sentinel"</span> \</li><li>  ghcr.io/sentinel/server:2.4.0</li></ol></code></pre>
+            </figure>
+          </div>
+          <div class="tabs-panel" role="tabpanel" id="panel-cargo" aria-labelledby="tab-cargo" hidden>
+            <figure class="code-block">
+              <div class="code-head">
+                <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="code-lang">bash</span>
+                <button class="code-copy" data-copy aria-label="复制代码">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <span>复制</span>
+                </button>
+              </div>
+              <pre><code><ol><li><span class="tok-c"># 作为库依赖引入，自行组装 server</span></li><li>cargo add sentinel-iam sentinel-org sentinel-sys</li></ol></code></pre>
+            </figure>
+          </div>
+          <div class="tabs-panel" role="tabpanel" id="panel-helm" aria-labelledby="tab-helm" hidden>
+            <figure class="code-block">
+              <div class="code-head">
+                <span class="dots" aria-hidden="true"><i></i><i></i><i></i></span>
+                <span class="code-lang">bash</span>
+                <button class="code-copy" data-copy aria-label="复制代码">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2"/><path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg>
+                  <span>复制</span>
+                </button>
+              </div>
+              <pre><code><ol><li><span class="tok-c"># 生产部署：三副本 + 独立 PostgreSQL 与 Redis</span></li><li>helm install sentinel sentinel/sentinel \</li><li>  --set replicaCount=<span class="tok-n">3</span> \</li><li>  --set postgresql.enabled=<span class="tok-k">true</span> --set redis.enabled=<span class="tok-k">true</span></li></ol></code></pre>
+            </figure>
+          </div>
+        </div>
+        <h3>启动前检查</h3>
+        <ol class="steps">
+          <li>
+            <h4>准备依赖服务</h4>
+            <p>PostgreSQL 15 及以上，Redis 7 及以上。两者均为强依赖，没有内存降级模式。</p>
+          </li>
+          <li>
+            <h4>执行数据库迁移</h4>
+            <p><code>sqlx migrate run</code> 会创建全部领域表与读模型投影表，迁移脚本随版本发布，不支持跳过。</p>
+          </li>
+          <li>
+            <h4>启动服务并验证</h4>
+            <p><code>cargo run -p server</code>，访问 <code>/healthz</code> 返回 <code>ok</code> 即就绪。默认监听 8080。</p>
+          </li>
+        </ol>
+      </section>
+
+      <!-- 05 核心特性 -->
+      <section id="features">
+        <h2><span class="no">05</span>核心特性</h2>
+        <p>四个特性定义了 Sentinel 与「把权限写死在 if 里」的方案之间的差距。</p>
+        <div class="feature-grid">
+          <div class="feature-card">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+            </span>
+            <h3>防腐分层</h3>
+            <p>application 层只依赖 domain 声明的端口，SQLx 实体被限制在 infrastructure 内。领域模型对数据库细节零感知，换存储不需要动一行业务代码。</p>
+          </div>
+          <div class="feature-card">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M3 5v14a9 3 0 0 0 18 0V5"/><path d="M3 12a9 3 0 0 0 18 0"/></svg>
+            </span>
+            <h3>投影读模型</h3>
+            <p>查询侧维护宽表投影，命中 Redis 时延中位数 1.2ms。缓存失效由领域事件驱动，不依赖定时清理。</p>
+          </div>
+          <div class="feature-card">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </span>
+            <h3>细粒度授权</h3>
+            <p>RBAC 角色叠加数据范围与字段级策略，判定逻辑集中在 domain，一条命令一个授权点。所有判定记录不可变审计事件。</p>
+          </div>
+          <div class="feature-card">
+            <span class="icon" aria-hidden="true">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            </span>
+            <h3>可观测性</h3>
+            <p>结构化日志、OpenTelemetry 链路追踪与审计事件流。每次授权判定都可回溯到具体角色、策略版本与请求 ID。</p>
+          </div>
+        </div>
+        <div class="callout callout-tip">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 14c.2-1 .7-1.7 1.5-2.1 1-.6 1.5-1.6 1.5-2.7 0-1.9-1.7-3.4-3.8-3.4S10.4 7.3 10.4 9.2c0 1.1.5 2.1 1.5 2.7.8.4 1.3 1.1 1.5 2.1"/><path d="M9 18h6"/><path d="M10 22h4"/></svg>
+          <div>
+            <strong>从零开始的最小闭环</strong>
+            <p>创建角色 → 绑定权限 → 分配给用户 → 在命令入口调用授权点。四步之后，系统里不再有任何裸露的权限判断。</p>
+          </div>
+        </div>
+      </section>
+
+      <!-- 06 下一步 -->
+      <section id="next-steps">
+        <h2><span class="no">06</span>下一步</h2>
+        <div class="doc-grid">
+          <a class="doc-card" href="#quickstart">
+            <span class="row">
+              <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+              快速开始
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+            <p>15 分钟跑通本地环境，完成第一次授权判定。</p>
+          </a>
+          <a class="doc-card" href="#architecture">
+            <span class="row">
+              <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 3 9 5-9 5-9-5 9-5Z"/><path d="m3 13 9 5 9-5"/></svg>
+              领域模型
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+            <p>六大聚合、不变量与跨模块端口逐一说明。</p>
+          </a>
+          <a class="doc-card" href="#overview">
+            <span class="row">
+              <svg class="lead" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"/></svg>
+              REST API
+              <svg class="arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M5 12h14M13 6l6 6-6 6"/></svg>
+            </span>
+            <p>端点约定、分页规范与错误码字典。</p>
+          </a>
+        </div>
+      </section>
+
+      <!-- 上下页 -->
+      <nav class="pager" aria-label="翻页">
+        <button class="pager-card placeholder" disabled>
+          <span>上一页</span>
+          <b>已是第一页</b>
+        </button>
+        <a class="pager-card next" href="#quickstart">
+          <span>下一页</span>
+          <b>快速开始 →</b>
+        </a>
+      </nav>
+
+      <!-- 页脚 -->
+      <footer class="doc-footer">
+        <div class="row">
+          <a class="prose-link" href="https://github.com" target="_blank" rel="noopener">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4Z"/></svg>
+            在 GitHub 上编辑此页
+          </a>
+          <span>最后更新于 2025-01-18</span>
+          <span class="badge badge-secondary"><span class="dot status-dot" aria-hidden="true"></span>All systems normal</span>
+        </div>
+        <p class="copyright">© 2025 Sentinel Contributors · Apache-2.0 · Built with Axum & SQLx</p>
+      </footer>
+
+      <!-- 移动端目录 -->
+      <details class="toc-mobile">
+        <summary>本页目录</summary>
+        <ul>
+          <li><a href="#overview">概览</a></li>
+          <li><a href="#principles">设计原则</a></li>
+          <li><a href="#architecture">架构总览</a></li>
+          <li><a href="#quickstart">快速上手</a></li>
+          <li><a href="#features">核心特性</a></li>
+          <li><a href="#next-steps">下一步</a></li>
+        </ul>
+      </details>
+    </div>
+  </main>
+
+  <!-- ==================== TOC ==================== -->
+  <aside class="toc" aria-label="本页目录">
+    <p class="toc-title">On this page</p>
+    <nav class="toc-list" id="toc-list">
+      <a href="#overview" class="toc-link">概览</a>
+      <a href="#principles" class="toc-link">设计原则</a>
+      <a href="#architecture" class="toc-link">架构总览</a>
+      <a href="#quickstart" class="toc-link">快速上手</a>
+      <a href="#features" class="toc-link">核心特性</a>
+      <a href="#next-steps" class="toc-link">下一步</a>
+    </nav>
+  </aside>
+</div>
+
+<!-- ==================== Command 搜索面板 ==================== -->
+<div class="cmdk" id="cmdk" role="dialog" aria-modal="true" aria-label="搜索文档">
+  <div class="cmdk-panel">
+    <div class="cmdk-input-row">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="8"/><path d="m21 21-4.3-4.3"/></svg>
+      <input id="cmdk-input" type="text" placeholder="搜索页面、指南与操作…" autocomplete="off" spellcheck="false" aria-controls="cmdk-list">
+    </div>
+    <div class="cmdk-list" id="cmdk-list" role="listbox"></div>
+    <div class="cmdk-footer">
+      <span><span class="kbd">↑</span> <span class="kbd">↓</span> 选择</span>
+      <span><span class="kbd">↵</span> 打开</span>
+      <span><span class="kbd">esc</span> 关闭</span>
+    </div>
+  </div>
+</div>
+
+<script>
+(function () {
+  "use strict";
+  var $ = function (s, c) { return (c || document).querySelector(s); };
+  var $$ = function (s, c) { return Array.prototype.slice.call((c || document).querySelectorAll(s)); };
+  var reduceMotion = matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  /* ---------- 主题切换 ---------- */
+  $("#theme-toggle").addEventListener("click", function () {
+    var next = document.documentElement.dataset.theme === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("sentinel-theme", next); } catch (e) {}
+  });
+
+  /* ---------- 移动端抽屉 ---------- */
+  var sidebar = $("#sidebar"), overlay = $("#overlay"), menuBtn = $("#menu-btn");
+  function openDrawer() {
+    sidebar.classList.add("open");
+    overlay.hidden = false;
+    requestAnimationFrame(function () { overlay.classList.add("show"); });
+    document.body.style.overflow = "hidden";
+    menuBtn.setAttribute("aria-expanded", "true");
+  }
+  function closeDrawer() {
+    sidebar.classList.remove("open");
+    overlay.classList.remove("show");
+    setTimeout(function () { if (!overlay.classList.contains("show")) overlay.hidden = true; }, 300);
+    document.body.style.overflow = "";
+    menuBtn.setAttribute("aria-expanded", "false");
+  }
+  menuBtn.addEventListener("click", openDrawer);
+  $("#drawer-close").addEventListener("click", closeDrawer);
+  overlay.addEventListener("click", closeDrawer);
+  $$(".nav-link").forEach(function (a) {
+    a.addEventListener("click", function () { if (matchMedia("(max-width: 1023px)").matches) closeDrawer(); });
+  });
+
+  /* ---------- Tabs ---------- */
+  $$("[data-tabs]").forEach(function (wrap) {
+    var tabs = $$('[role="tab"]', wrap), panels = $$('[role="tabpanel"]', wrap);
+    function select(tab) {
+      tabs.forEach(function (t) {
+        var on = t === tab;
+        t.setAttribute("aria-selected", on ? "true" : "false");
+        t.tabIndex = on ? 0 : -1;
+      });
+      panels.forEach(function (p) { p.hidden = p.id !== tab.getAttribute("aria-controls"); });
+    }
+    tabs.forEach(function (t, i) {
+      t.addEventListener("click", function () { select(t); });
+      t.addEventListener("keydown", function (e) {
+        if (e.key === "ArrowRight" || e.key === "ArrowLeft") {
+          e.preventDefault();
+          var dir = e.key === "ArrowRight" ? 1 : -1;
+          select(tabs[(i + dir + tabs.length) % tabs.length]);
+          tabs[(i + dir + tabs.length) % tabs.length].focus();
+        }
+      });
+    });
+  });
+
+  /* ---------- 复制代码 ---------- */
+  $$("[data-copy]").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      var pre = btn.closest(".code-block").querySelector("pre");
+      var text = pre.innerText;
+      var done = function () {
+        btn.classList.add("copied");
+        var label = $("span", btn);
+        var old = label.textContent;
+        label.textContent = "已复制";
+        setTimeout(function () { btn.classList.remove("copied"); label.textContent = old; }, 1600);
+      };
+      if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done, done);
+      } else {
+        var ta = document.createElement("textarea");
+        ta.value = text; document.body.appendChild(ta); ta.select();
+        try { document.execCommand("copy"); } catch (e) {}
+        document.body.removeChild(ta); done();
+      }
+    });
+  });
+
+  /* ---------- 滚动：进度条 + TOC 高亮 ---------- */
+  var progress = $("#progress");
+  var heads = $$("#content h2[id]");
+  var tocLinks = $$(".toc-link");
+  var ticking = false;
+  function onScroll() {
+    if (ticking) return;
+    ticking = true;
+    requestAnimationFrame(function () {
+      var h = document.documentElement;
+      var max = h.scrollHeight - h.clientHeight;
+      progress.style.width = (max > 0 ? (h.scrollTop / max) * 100 : 0) + "%";
+      var current = heads[0];
+      heads.forEach(function (el) { if (el.getBoundingClientRect().top <= 120) current = el; });
+      tocLinks.forEach(function (a) {
+        a.classList.toggle("is-active", !!current && a.getAttribute("href") === "#" + current.id);
+      });
+      ticking = false;
+    });
+  }
+  window.addEventListener("scroll", onScroll, { passive: true });
+  window.addEventListener("resize", onScroll);
+  onScroll();
+
+  /* ---------- 滚动揭示 ---------- */
+  var revealEls = $$(".reveal");
+  if (reduceMotion || !("IntersectionObserver" in window)) {
+    revealEls.forEach(function (el) { el.classList.add("in"); });
+  } else {
+    var io = new IntersectionObserver(function (entries) {
+      entries.forEach(function (en) {
+        if (en.isIntersecting) { en.target.classList.add("in"); io.unobserve(en.target); }
+      });
+    }, { rootMargin: "0px 0px -8% 0px", threshold: 0.05 });
+    revealEls.forEach(function (el) { io.observe(el); });
+  }
+
+  /* ---------- Command 面板 ---------- */
+  var cmdk = $("#cmdk"), cmdkInput = $("#cmdk-input"), cmdkList = $("#cmdk-list");
+  var icon = {
+    page: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"/><path d="M14 2v5h5"/></svg>',
+    zap: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 2 3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+    sun: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M6.34 17.66l-1.41 1.41M19.07 4.93l-1.41 1.41"/></svg>',
+    github: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844c.85.004 1.705.115 2.504.337 1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.02 10.02 0 0 0 22 12.017C22 6.484 17.522 2 12 2Z"/></svg>'
+  };
+  var commands = [
+    { label: "简介", group: "开始", href: "#", ico: "page" },
+    { label: "快速开始", group: "开始", href: "#quickstart", ico: "page" },
+    { label: "安装配置", group: "开始", href: "#quickstart", ico: "page" },
+    { label: "领域模型", group: "核心概念", href: "#", ico: "page" },
+    { label: "权限模型", group: "核心概念", href: "#", ico: "page" },
+    { label: "多租户", group: "核心概念", href: "#", ico: "page", badge: "New" },
+    { label: "模块边界", group: "架构", href: "#architecture", ico: "page" },
+    { label: "CQRS 模式", group: "架构", href: "#", ico: "page" },
+    { label: "数据流", group: "架构", href: "#", ico: "page" },
+    { label: "缓存策略", group: "指南", href: "#", ico: "page" },
+    { label: "错误处理", group: "指南", href: "#", ico: "page" },
+    { label: "部署运维", group: "指南", href: "#", ico: "page" },
+    { label: "REST API", group: "API 参考", href: "#", ico: "page" },
+    { label: "错误码", group: "API 参考", href: "#", ico: "page" },
+    { label: "CLI", group: "API 参考", href: "#", ico: "page" },
+    { label: "切换明暗主题", group: "操作", action: "theme", ico: "sun" },
+    { label: "在 GitHub 上查看仓库", group: "操作", href: "https://github.com", ico: "github" }
+  ];
+  var activeIndex = 0, visible = [];
+
+  function render(query) {
+    var q = query.trim().toLowerCase();
+    visible = commands.filter(function (c) {
+      return !q || c.label.toLowerCase().indexOf(q) > -1 || c.group.toLowerCase().indexOf(q) > -1;
+    });
+    if (activeIndex >= visible.length) activeIndex = 0;
+    var html = "", lastGroup = "";
+    visible.forEach(function (c, i) {
+      if (c.group !== lastGroup) { html += '<p class="cmdk-group">' + c.group + "</p>"; lastGroup = c.group; }
+      html += '<button type="button" class="cmdk-item' + (i === activeIndex ? " is-active" : "") + '" data-i="' + i + '" role="option" aria-selected="' + (i === activeIndex) + '">' +
+        icon[c.ico] + "<span>" + c.label + "</span>" +
+        (c.badge ? '<span class="badge badge-new" style="margin-left:auto">' + c.badge + "</span>" : "") +
+        (c.action === "theme" ? '<span class="hint">↵ 切换</span>' : "") +
+        "</button>";
+    });
+    cmdkList.innerHTML = html || '<p class="cmdk-empty">未找到与「' + query.replace(/</g, "&lt;") + '」相关的结果</p>';
+    $$(".cmdk-item", cmdkList).forEach(function (btn) {
+      btn.addEventListener("click", function () { run(visible[+btn.dataset.i]); });
+      btn.addEventListener("mouseenter", function () {
+        activeIndex = +btn.dataset.i;
+        $$(".cmdk-item", cmdkList).forEach(function (b, j) {
+          b.classList.toggle("is-active", j === activeIndex);
+          b.setAttribute("aria-selected", j === activeIndex);
+        });
+      });
+    });
+  }
+  function run(cmd) {
+    if (!cmd) return;
+    closeCmdk();
+    if (cmd.action === "theme") { $("#theme-toggle").click(); return; }
+    if (cmd.href && cmd.href.charAt(0) === "#") {
+      var el = $(cmd.href);
+      if (el) el.scrollIntoView({ behavior: reduceMotion ? "auto" : "smooth", block: "start" });
+    } else if (cmd.href) {
+      window.open(cmd.href, "_blank", "noopener");
+    }
+  }
+  function openCmdk() {
+    cmdk.classList.add("show");
+    document.body.style.overflow = "hidden";
+    cmdkInput.value = ""; activeIndex = 0; render("");
+    setTimeout(function () { cmdkInput.focus(); }, 60);
+  }
+  function closeCmdk() {
+    cmdk.classList.remove("show");
+    document.body.style.overflow = "";
+    $("#search-btn").focus();
+  }
+  $("#search-btn").addEventListener("click", openCmdk);
+  cmdk.addEventListener("click", function (e) { if (e.target === cmdk) closeCmdk(); });
+  cmdkInput.addEventListener("input", function () { activeIndex = 0; render(cmdkInput.value); });
+  cmdkInput.addEventListener("keydown", function (e) {
+    if (e.key === "ArrowDown") {
+      e.preventDefault();
+      if (visible.length) { activeIndex = (activeIndex + 1) % visible.length; render(cmdkInput.value); }
+    } else if (e.key === "ArrowUp") {
+      e.preventDefault();
+      if (visible.length) { activeIndex = (activeIndex - 1 + visible.length) % visible.length; render(cmdkInput.value); }
+    } else if (e.key === "Enter") {
+      e.preventDefault(); run(visible[activeIndex]);
+    } else if (e.key === "Escape") {
+      closeCmdk();
+    }
+  });
+
+  /* ---------- 全局键盘 ---------- */
+  document.addEventListener("keydown", function (e) {
+    var typing = /^(INPUT|TEXTAREA)$/.test(document.activeElement.tagName);
+    if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+      e.preventDefault();
+      cmdk.classList.contains("show") ? closeCmdk() : openCmdk();
+    } else if (e.key === "/" && !typing) {
+      e.preventDefault(); openCmdk();
+    } else if (e.key === "Escape") {
+      if (cmdk.classList.contains("show")) closeCmdk();
+      else if (sidebar.classList.contains("open")) closeDrawer();
+    }
+  });
+})();
+</script>
+</body>
+</html>

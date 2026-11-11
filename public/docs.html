@@ -1,0 +1,4297 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Polyglot · 编程语言学习文档</title>
+    <meta
+      name="description"
+      content="一份面向现代编程语言的系统学习文档：类型系统、并发模型、工程实践与学习路线。"
+    />
+    <style>
+      /* ============================================================
+   shadcn/ui 默认主题（base-color: neutral, style: aria-nova）
+   ============================================================ */
+      :root {
+        --background: oklch(1 0 0);
+        --foreground: oklch(0.145 0 0);
+        --card: oklch(1 0 0);
+        --card-foreground: oklch(0.145 0 0);
+        --popover: oklch(1 0 0);
+        --popover-foreground: oklch(0.145 0 0);
+        --primary: oklch(0.205 0 0);
+        --primary-foreground: oklch(0.985 0 0);
+        --secondary: oklch(0.97 0 0);
+        --secondary-foreground: oklch(0.205 0 0);
+        --muted: oklch(0.97 0 0);
+        --muted-foreground: oklch(0.556 0 0);
+        --accent: oklch(0.97 0 0);
+        --accent-foreground: oklch(0.205 0 0);
+        --destructive: oklch(0.577 0.245 27.325);
+        --destructive-foreground: oklch(0.985 0 0);
+        --border: oklch(0.922 0 0);
+        --input: oklch(0.922 0 0);
+        --ring: oklch(0.708 0 0);
+        --chart-1: oklch(0.87 0 0);
+        --chart-2: oklch(0.556 0 0);
+        --chart-3: oklch(0.439 0 0);
+        --chart-4: oklch(0.371 0 0);
+        --chart-5: oklch(0.269 0 0);
+        --radius: 0.625rem;
+        --sidebar: oklch(0.985 0 0);
+        --sidebar-foreground: oklch(0.145 0 0);
+        --sidebar-primary: oklch(0.205 0 0);
+        --sidebar-primary-foreground: oklch(0.985 0 0);
+        --sidebar-accent: oklch(0.97 0 0);
+        --sidebar-accent-foreground: oklch(0.205 0 0);
+        --sidebar-border: oklch(0.922 0 0);
+        --sidebar-ring: oklch(0.708 0 0);
+
+        --syntax-keyword: oklch(0.52 0.19 288);
+        --syntax-string: oklch(0.48 0.13 152);
+        --syntax-number: oklch(0.55 0.15 45);
+        --syntax-comment: oklch(0.62 0.02 260);
+        --syntax-function: oklch(0.5 0.14 250);
+        --syntax-type: oklch(0.5 0.11 195);
+        --syntax-builtin: oklch(0.56 0.11 35);
+
+        --font-sans:
+          "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto,
+          "Helvetica Neue", "PingFang SC", "Hiragino Sans GB",
+          "Microsoft YaHei", sans-serif;
+        --font-mono:
+          ui-monospace, SFMono-Regular, "JetBrains Mono", Menlo, Consolas,
+          "Liberation Mono", "Courier New", monospace;
+      }
+
+      .dark {
+        --background: oklch(0.145 0 0);
+        --foreground: oklch(0.985 0 0);
+        --card: oklch(0.205 0 0);
+        --card-foreground: oklch(0.985 0 0);
+        --popover: oklch(0.205 0 0);
+        --popover-foreground: oklch(0.985 0 0);
+        --primary: oklch(0.922 0 0);
+        --primary-foreground: oklch(0.205 0 0);
+        --secondary: oklch(0.269 0 0);
+        --secondary-foreground: oklch(0.985 0 0);
+        --muted: oklch(0.269 0 0);
+        --muted-foreground: oklch(0.708 0 0);
+        --accent: oklch(0.269 0 0);
+        --accent-foreground: oklch(0.985 0 0);
+        --destructive: oklch(0.704 0.191 22.216);
+        --destructive-foreground: oklch(0.985 0 0);
+        --border: oklch(1 0 0 / 10%);
+        --input: oklch(1 0 0 / 15%);
+        --ring: oklch(0.556 0 0);
+        --sidebar: oklch(0.205 0 0);
+        --sidebar-foreground: oklch(0.985 0 0);
+        --sidebar-primary: oklch(0.488 0.243 264.376);
+        --sidebar-primary-foreground: oklch(0.985 0 0);
+        --sidebar-accent: oklch(0.269 0 0);
+        --sidebar-accent-foreground: oklch(0.985 0 0);
+        --sidebar-border: oklch(1 0 0 / 10%);
+        --sidebar-ring: oklch(0.556 0 0);
+
+        --syntax-keyword: oklch(0.75 0.15 300);
+        --syntax-string: oklch(0.78 0.13 155);
+        --syntax-number: oklch(0.79 0.13 65);
+        --syntax-comment: oklch(0.6 0.02 260);
+        --syntax-function: oklch(0.75 0.12 250);
+        --syntax-type: oklch(0.78 0.1 195);
+        --syntax-builtin: oklch(0.8 0.1 45);
+      }
+
+      /* ============================================================ 基础 */
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+      }
+      *::before,
+      *::after {
+        border-color: var(--border);
+      }
+      html {
+        scroll-behavior: smooth;
+        scroll-padding-top: 88px;
+        -webkit-text-size-adjust: 100%;
+      }
+      body {
+        margin: 0;
+        background: var(--background);
+        color: var(--foreground);
+        font-family: var(--font-sans);
+        font-size: 15px;
+        line-height: 1.75;
+        -webkit-font-smoothing: antialiased;
+        text-rendering: optimizeLegibility;
+      }
+      a {
+        color: inherit;
+        text-decoration: none;
+      }
+      button {
+        font: inherit;
+        color: inherit;
+      }
+      code,
+      pre,
+      kbd {
+        font-family: var(--font-mono);
+      }
+      ::selection {
+        background: color-mix(in oklch, var(--foreground) 15%, transparent);
+      }
+      :focus-visible {
+        outline: 2px solid var(--ring);
+        outline-offset: 2px;
+      }
+      .sr-only {
+        position: absolute;
+        width: 1px;
+        height: 1px;
+        padding: 0;
+        margin: -1px;
+        overflow: hidden;
+        clip: rect(0, 0, 0, 0);
+        white-space: nowrap;
+        border: 0;
+      }
+      .icon {
+        width: 16px;
+        height: 16px;
+        flex: none;
+        stroke-width: 2;
+      }
+      .icon-lg {
+        width: 20px;
+        height: 20px;
+      }
+
+      /* 滚动条 */
+      * {
+        scrollbar-width: thin;
+        scrollbar-color: var(--border) transparent;
+      }
+      ::-webkit-scrollbar {
+        width: 10px;
+        height: 10px;
+      }
+      ::-webkit-scrollbar-thumb {
+        background: color-mix(
+          in oklch,
+          var(--muted-foreground) 35%,
+          transparent
+        );
+        border-radius: 9999px;
+        border: 3px solid transparent;
+        background-clip: content-box;
+      }
+      ::-webkit-scrollbar-thumb:hover {
+        background: color-mix(
+          in oklch,
+          var(--muted-foreground) 60%,
+          transparent
+        );
+        background-clip: content-box;
+      }
+
+      /* ============================================================ 阅读进度条 */
+      .read-progress {
+        position: fixed;
+        inset: 0 0 auto 0;
+        height: 2px;
+        z-index: 60;
+        background: transparent;
+        pointer-events: none;
+      }
+      .read-progress > i {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--foreground);
+        transition: width 0.08s linear;
+      }
+
+      /* ============================================================ 顶部导航 */
+      .site-header {
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        height: 56px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 0 16px;
+        background: color-mix(in oklch, var(--background) 85%, transparent);
+        backdrop-filter: saturate(180%) blur(12px);
+        border-bottom: 1px solid var(--border);
+      }
+      .brand {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+      }
+      .brand-mark {
+        width: 28px;
+        height: 28px;
+        display: grid;
+        place-items: center;
+        border-radius: calc(var(--radius) * 0.7);
+        background: var(--primary);
+        color: var(--primary-foreground);
+        font-size: 15px;
+        font-weight: 700;
+      }
+      .brand-name {
+        font-size: 15px;
+      }
+      .brand-name span {
+        color: var(--muted-foreground);
+        font-weight: 500;
+      }
+      .header-sep {
+        width: 1px;
+        height: 20px;
+        background: var(--border);
+      }
+      .header-nav {
+        display: none;
+        align-items: center;
+        gap: 2px;
+        margin-left: 8px;
+      }
+      .header-nav a {
+        padding: 6px 10px;
+        border-radius: calc(var(--radius) * 0.7);
+        font-size: 14px;
+        color: var(--muted-foreground);
+        transition:
+          color 0.15s,
+          background 0.15s;
+      }
+      .header-nav a:hover {
+        color: var(--foreground);
+        background: var(--accent);
+      }
+      .header-nav a[aria-current="page"] {
+        color: var(--foreground);
+        font-weight: 500;
+      }
+      .header-spacer {
+        flex: 1;
+      }
+
+      .search-trigger {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        height: 32px;
+        padding: 0 8px 0 10px;
+        min-width: 190px;
+        border: 1px solid var(--input);
+        border-radius: calc(var(--radius) * 0.8);
+        background: var(--background);
+        color: var(--muted-foreground);
+        font-size: 13.5px;
+        cursor: pointer;
+        transition:
+          border-color 0.15s,
+          background 0.15s;
+      }
+      .search-trigger:hover {
+        border-color: var(--ring);
+        background: var(--muted);
+      }
+      .search-trigger .label {
+        flex: 1;
+        text-align: left;
+      }
+      .kbd {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-width: 20px;
+        height: 20px;
+        padding: 0 5px;
+        border-radius: calc(var(--radius) * 0.5);
+        border: 1px solid var(--border);
+        background: var(--muted);
+        color: var(--muted-foreground);
+        font-family: var(--font-sans);
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1;
+      }
+
+      .lang-switch {
+        display: none;
+        align-items: center;
+        padding: 2px;
+        gap: 2px;
+        background: var(--muted);
+        border-radius: calc(var(--radius) * 0.8);
+      }
+      .lang-switch button {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        padding: 4px 10px;
+        border-radius: calc(var(--radius) * 0.6);
+        font-size: 12.5px;
+        font-weight: 500;
+        color: var(--muted-foreground);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .lang-switch button:hover {
+        color: var(--foreground);
+      }
+      .lang-switch button[data-active="true"] {
+        background: var(--background);
+        color: var(--foreground);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.06);
+      }
+      .dark .lang-switch button[data-active="true"] {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+
+      .icon-btn {
+        display: inline-grid;
+        place-items: center;
+        width: 32px;
+        height: 32px;
+        border: 1px solid transparent;
+        border-radius: calc(var(--radius) * 0.8);
+        background: transparent;
+        color: var(--muted-foreground);
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .icon-btn:hover {
+        background: var(--accent);
+        color: var(--foreground);
+      }
+      .progress-pill {
+        display: none;
+        align-items: center;
+        gap: 7px;
+        height: 32px;
+        padding: 0 10px;
+        border: 1px solid var(--border);
+        border-radius: 9999px;
+        font-size: 12.5px;
+        color: var(--muted-foreground);
+        background: var(--background);
+      }
+      .progress-pill .ring {
+        width: 18px;
+        height: 18px;
+        transform: rotate(-90deg);
+      }
+      .progress-pill .ring circle {
+        fill: none;
+        stroke-width: 3;
+      }
+      .progress-pill .ring .bg {
+        stroke: var(--border);
+      }
+      .progress-pill .ring .fg {
+        stroke: var(--foreground);
+        stroke-linecap: round;
+        transition: stroke-dashoffset 0.4s ease;
+      }
+
+      /* ============================================================ 布局 */
+      .layout {
+        display: grid;
+        grid-template-columns: 1fr;
+      }
+      .sidebar {
+        position: fixed;
+        inset: 0 auto 0 0;
+        z-index: 45;
+        width: 268px;
+        padding: 16px 12px 24px;
+        overflow-y: auto;
+        background: var(--sidebar);
+        border-right: 1px solid var(--sidebar-border);
+        transform: translateX(-100%);
+        transition: transform 0.22s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .sidebar.open {
+        transform: none;
+      }
+      .scrim {
+        position: fixed;
+        inset: 0;
+        z-index: 44;
+        background: rgba(0, 0, 0, 0.45);
+        opacity: 0;
+        pointer-events: none;
+        transition: opacity 0.2s;
+      }
+      .scrim.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .content-wrap {
+        min-width: 0;
+      }
+      .content-grid {
+        display: grid;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 48px;
+        max-width: 1320px;
+        margin: 0 auto;
+        padding: 32px 20px 96px;
+      }
+      .toc {
+        display: none;
+      }
+
+      /* 侧边栏导航 */
+      .nav-group + .nav-group {
+        margin-top: 20px;
+      }
+      .sidebar-head {
+        display: none;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 4px 12px 10px;
+        margin-bottom: 8px;
+        border-bottom: 1px solid var(--sidebar-border);
+      }
+      .only-mobile {
+        display: inline-grid;
+      }
+      .nav-group-title {
+        font-size: 12px;
+        font-weight: 600;
+        letter-spacing: 0.04em;
+        text-transform: uppercase;
+        color: var(--muted-foreground);
+        padding: 0 10px;
+        margin-bottom: 6px;
+      }
+      .nav-link {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 10px;
+        border-radius: calc(var(--radius) * 0.7);
+        font-size: 14px;
+        color: var(--sidebar-foreground);
+        cursor: pointer;
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .nav-link:hover {
+        background: var(--sidebar-accent);
+        color: var(--sidebar-accent-foreground);
+      }
+      .nav-link.active {
+        background: var(--sidebar-accent);
+        color: var(--sidebar-accent-foreground);
+        font-weight: 500;
+      }
+      .nav-link .icon {
+        width: 15px;
+        height: 15px;
+        opacity: 0.7;
+      }
+      .nav-link .dot {
+        margin-left: auto;
+        width: 6px;
+        height: 6px;
+        border-radius: 9999px;
+        background: var(--foreground);
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .nav-link.done .dot {
+        opacity: 0.8;
+      }
+      .sidebar-footer {
+        margin-top: 24px;
+        padding: 12px;
+        border: 1px solid var(--sidebar-border);
+        border-radius: var(--radius);
+        background: color-mix(in oklch, var(--sidebar-accent) 55%, transparent);
+        font-size: 12.5px;
+        color: var(--muted-foreground);
+      }
+      .sidebar-footer a {
+        color: var(--foreground);
+        font-weight: 500;
+      }
+      .sidebar-footer a:hover {
+        text-decoration: underline;
+      }
+
+      /* ============================================================ 文章排版 */
+      .article {
+        max-width: 760px;
+      }
+      .breadcrumb {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        font-size: 13px;
+        color: var(--muted-foreground);
+        margin-bottom: 14px;
+      }
+      .breadcrumb a:hover {
+        color: var(--foreground);
+      }
+      .breadcrumb .sep {
+        opacity: 0.5;
+      }
+
+      h1 {
+        font-size: 34px;
+        line-height: 1.25;
+        font-weight: 700;
+        letter-spacing: -0.022em;
+        margin: 0 0 14px;
+      }
+      .lede {
+        font-size: 17px;
+        line-height: 1.75;
+        color: var(--muted-foreground);
+        margin: 0 0 26px;
+      }
+      .meta-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 34px;
+      }
+      .badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 5px;
+        height: 22px;
+        padding: 0 8px;
+        border-radius: calc(var(--radius) * 0.7);
+        border: 1px solid var(--border);
+        background: var(--secondary);
+        color: var(--secondary-foreground);
+        font-size: 12px;
+        font-weight: 500;
+        line-height: 1;
+      }
+      .badge.outline {
+        background: transparent;
+      }
+      .badge .icon {
+        width: 12px;
+        height: 12px;
+      }
+
+      h2 {
+        font-size: 23px;
+        font-weight: 650;
+        letter-spacing: -0.015em;
+        line-height: 1.4;
+        margin: 52px 0 14px;
+        padding-top: 8px;
+        scroll-margin-top: 88px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      h2 .anchor {
+        opacity: 0;
+        color: var(--muted-foreground);
+        font-weight: 400;
+        font-size: 18px;
+        transition: opacity 0.15s;
+        cursor: pointer;
+      }
+      h2:hover .anchor {
+        opacity: 0.7;
+      }
+      h3 {
+        font-size: 17px;
+        font-weight: 600;
+        letter-spacing: -0.01em;
+        margin: 30px 0 10px;
+        scroll-margin-top: 88px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      h3 .anchor {
+        opacity: 0;
+        color: var(--muted-foreground);
+        font-weight: 400;
+        transition: opacity 0.15s;
+        cursor: pointer;
+      }
+      h3:hover .anchor {
+        opacity: 0.7;
+      }
+      p {
+        margin: 0 0 14px;
+        color: var(--foreground);
+      }
+      .article p {
+        color: color-mix(in oklch, var(--foreground) 92%, transparent);
+      }
+      a.underline-link {
+        text-decoration: underline;
+        text-underline-offset: 3px;
+        text-decoration-color: var(--border);
+      }
+      a.underline-link:hover {
+        text-decoration-color: var(--foreground);
+      }
+      strong {
+        font-weight: 600;
+      }
+      ul,
+      ol {
+        margin: 0 0 16px;
+        padding-left: 22px;
+      }
+      li {
+        margin: 5px 0;
+      }
+      li::marker {
+        color: var(--muted-foreground);
+      }
+      hr {
+        border: 0;
+        border-top: 1px solid var(--border);
+        margin: 40px 0;
+      }
+      .inline-code {
+        font-size: 0.875em;
+        padding: 2px 5px;
+        border-radius: calc(var(--radius) * 0.5);
+        background: var(--muted);
+        border: 1px solid var(--border);
+        color: var(--foreground);
+        white-space: nowrap;
+      }
+      .section-check {
+        margin-left: auto;
+        flex: none;
+        width: 26px;
+        height: 26px;
+        border-radius: 9999px;
+        border: 1px solid var(--border);
+        background: transparent;
+        color: var(--muted-foreground);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        transition: all 0.18s;
+      }
+      .section-check:hover {
+        border-color: var(--ring);
+        color: var(--foreground);
+      }
+      .section-check[data-done="true"] {
+        background: var(--primary);
+        border-color: var(--primary);
+        color: var(--primary-foreground);
+      }
+      .section-check .icon {
+        width: 14px;
+        height: 14px;
+        opacity: 0;
+        transition: opacity 0.18s;
+      }
+      .section-check[data-done="true"] .icon {
+        opacity: 1;
+      }
+
+      /* 卡片 */
+      .card {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card);
+        color: var(--card-foreground);
+      }
+      .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(232px, 1fr));
+        gap: 14px;
+        margin: 22px 0 26px;
+      }
+      .card-grid .card {
+        padding: 18px;
+        transition:
+          border-color 0.18s,
+          transform 0.18s,
+          box-shadow 0.18s;
+      }
+      .card-grid .card:hover {
+        border-color: var(--ring);
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px -12px rgba(0, 0, 0, 0.25);
+      }
+      .card-ico {
+        width: 34px;
+        height: 34px;
+        border-radius: calc(var(--radius) * 0.8);
+        display: grid;
+        place-items: center;
+        background: var(--muted);
+        color: var(--foreground);
+        margin-bottom: 12px;
+      }
+      .card-title {
+        font-weight: 600;
+        font-size: 14.5px;
+        margin-bottom: 4px;
+      }
+      .card-desc {
+        font-size: 13.5px;
+        color: var(--muted-foreground);
+        line-height: 1.65;
+        margin: 0;
+      }
+
+      /* 提示框 */
+      .alert {
+        display: flex;
+        gap: 12px;
+        padding: 14px 16px;
+        margin: 20px 0;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card);
+        font-size: 14px;
+        line-height: 1.7;
+      }
+      .alert .icon {
+        margin-top: 3px;
+      }
+      .alert-title {
+        font-weight: 600;
+        margin-bottom: 2px;
+      }
+      .alert p {
+        margin: 0;
+        color: var(--muted-foreground);
+      }
+      .alert.info {
+        background: color-mix(in oklch, var(--chart-1) 40%, var(--background));
+      }
+      .alert.tip {
+        background: color-mix(in oklch, var(--chart-2) 22%, var(--background));
+      }
+      .alert.warn {
+        background: color-mix(
+          in oklch,
+          var(--destructive) 10%,
+          var(--background)
+        );
+        border-color: color-mix(
+          in oklch,
+          var(--destructive) 35%,
+          var(--border)
+        );
+      }
+      .alert.warn .icon {
+        color: var(--destructive);
+      }
+
+      /* 表格 */
+      .table-wrap {
+        margin: 20px 0 26px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        font-size: 14px;
+      }
+      thead th {
+        background: var(--muted);
+        color: var(--muted-foreground);
+        font-weight: 600;
+        font-size: 12.5px;
+        text-align: left;
+        letter-spacing: 0.03em;
+        text-transform: uppercase;
+        padding: 10px 14px;
+        border-bottom: 1px solid var(--border);
+        white-space: nowrap;
+      }
+      tbody td {
+        padding: 11px 14px;
+        border-bottom: 1px solid var(--border);
+        vertical-align: top;
+      }
+      tbody tr:last-child td {
+        border-bottom: 0;
+      }
+      tbody tr:hover {
+        background: color-mix(in oklch, var(--muted) 55%, transparent);
+      }
+      td code,
+      th code {
+        font-size: 12.5px;
+      }
+
+      /* 折叠面板 */
+      .accordion {
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        margin: 20px 0 26px;
+        overflow: hidden;
+      }
+      .acc-item + .acc-item {
+        border-top: 1px solid var(--border);
+      }
+      .acc-trigger {
+        width: 100%;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 14px 16px;
+        background: transparent;
+        border: 0;
+        text-align: left;
+        cursor: pointer;
+        font-size: 14.5px;
+        font-weight: 500;
+        transition: background 0.15s;
+      }
+      .acc-trigger:hover {
+        background: var(--muted);
+      }
+      .acc-trigger .chev {
+        margin-left: auto;
+        transition: transform 0.2s;
+        color: var(--muted-foreground);
+      }
+      .acc-item.open .acc-trigger .chev {
+        transform: rotate(90deg);
+      }
+      .acc-panel {
+        display: none;
+        padding: 2px 16px 16px;
+        color: var(--muted-foreground);
+        font-size: 14px;
+      }
+      .acc-item.open .acc-panel {
+        display: block;
+      }
+      .acc-panel p:last-child {
+        margin-bottom: 0;
+      }
+
+      /* 步骤 / 时间线 */
+      .steps {
+        margin: 22px 0 28px;
+      }
+      .step {
+        position: relative;
+        padding-left: 44px;
+        padding-bottom: 26px;
+      }
+      .step:last-child {
+        padding-bottom: 0;
+      }
+      .step::before {
+        content: "";
+        position: absolute;
+        left: 13px;
+        top: 30px;
+        bottom: 2px;
+        width: 1px;
+        background: var(--border);
+      }
+      .step:last-child::before {
+        display: none;
+      }
+      .step-num {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 28px;
+        height: 28px;
+        border-radius: 9999px;
+        display: grid;
+        place-items: center;
+        font-size: 12.5px;
+        font-weight: 600;
+        background: var(--muted);
+        color: var(--foreground);
+        border: 1px solid var(--border);
+      }
+      .step-title {
+        font-weight: 600;
+        font-size: 15px;
+        margin-bottom: 3px;
+      }
+      .step-desc {
+        font-size: 14px;
+        color: var(--muted-foreground);
+        margin: 0;
+      }
+
+      /* 进度卡片 */
+      .progress-card {
+        padding: 18px;
+        margin: 24px 0 30px;
+      }
+      .progress-card .top {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        margin-bottom: 12px;
+      }
+      .progress-card .top strong {
+        font-size: 14.5px;
+      }
+      .progress-card .top span {
+        font-size: 13px;
+        color: var(--muted-foreground);
+      }
+      .progress-bar {
+        height: 7px;
+        border-radius: 9999px;
+        background: var(--muted);
+        overflow: hidden;
+      }
+      .progress-bar > i {
+        display: block;
+        height: 100%;
+        width: 0%;
+        background: var(--foreground);
+        border-radius: 9999px;
+        transition: width 0.45s cubic-bezier(0.4, 0, 0.2, 1);
+      }
+      .progress-card .hint {
+        margin: 10px 0 0;
+        font-size: 12.5px;
+        color: var(--muted-foreground);
+      }
+
+      /* 代码块 */
+      .code-block {
+        margin: 20px 0 24px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        overflow: hidden;
+        background: var(--card);
+      }
+      .code-toolbar {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 6px 8px 6px 10px;
+        border-bottom: 1px solid var(--border);
+        background: color-mix(in oklch, var(--muted) 60%, transparent);
+        flex-wrap: wrap;
+      }
+      .code-langs {
+        display: flex;
+        align-items: center;
+        gap: 2px;
+        flex-wrap: wrap;
+      }
+      .code-lang {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        padding: 4px 9px;
+        border-radius: calc(var(--radius) * 0.6);
+        font-size: 12px;
+        font-weight: 500;
+        font-family: var(--font-mono);
+        color: var(--muted-foreground);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .code-lang:hover {
+        background: var(--background);
+        color: var(--foreground);
+      }
+      .code-lang[data-active="true"] {
+        background: var(--background);
+        color: var(--foreground);
+        box-shadow: inset 0 0 0 1px var(--border);
+      }
+      .code-actions {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .code-copy {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        height: 26px;
+        padding: 0 9px;
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) * 0.7);
+        background: var(--background);
+        color: var(--muted-foreground);
+        font-size: 12px;
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .code-copy:hover {
+        color: var(--foreground);
+        border-color: var(--ring);
+      }
+      .code-copy .icon {
+        width: 13px;
+        height: 13px;
+      }
+      pre.code-pre {
+        margin: 0;
+        padding: 16px 18px;
+        overflow-x: auto;
+        font-size: 13.2px;
+        line-height: 1.75;
+        background: var(--card);
+      }
+      code.code-code {
+        font-size: inherit;
+        white-space: pre;
+      }
+      .tok-com {
+        color: var(--syntax-comment);
+        font-style: italic;
+      }
+      .tok-str {
+        color: var(--syntax-string);
+      }
+      .tok-num {
+        color: var(--syntax-number);
+      }
+      .tok-kw {
+        color: var(--syntax-keyword);
+      }
+      .tok-fn {
+        color: var(--syntax-function);
+      }
+      .tok-type {
+        color: var(--syntax-type);
+      }
+      .tok-bi {
+        color: var(--syntax-builtin);
+      }
+      .tok-op {
+        color: var(--muted-foreground);
+      }
+
+      /* 通用 tab 组 */
+      .tabs {
+        margin: 20px 0 24px;
+      }
+      .tab-list {
+        display: inline-flex;
+        gap: 2px;
+        padding: 3px;
+        border-radius: calc(var(--radius) * 0.8);
+        background: var(--muted);
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+      }
+      .tab-list button {
+        border: 0;
+        background: transparent;
+        cursor: pointer;
+        padding: 5px 12px;
+        border-radius: calc(var(--radius) * 0.6);
+        font-size: 13px;
+        font-weight: 500;
+        color: var(--muted-foreground);
+        transition:
+          background 0.15s,
+          color 0.15s;
+      }
+      .tab-list button:hover {
+        color: var(--foreground);
+      }
+      .tab-list button[aria-selected="true"] {
+        background: var(--background);
+        color: var(--foreground);
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.07);
+      }
+      .dark .tab-list button[aria-selected="true"] {
+        box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+      }
+      .tab-panel {
+        display: none;
+      }
+      .tab-panel.active {
+        display: block;
+      }
+
+      /* 资源列表 */
+      .link-list {
+        display: grid;
+        gap: 10px;
+        margin: 20px 0 26px;
+      }
+      .link-card {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card);
+        transition:
+          border-color 0.18s,
+          background 0.18s;
+      }
+      .link-card:hover {
+        border-color: var(--ring);
+        background: var(--muted);
+      }
+      .link-card .icon {
+        color: var(--muted-foreground);
+      }
+      .link-card .t {
+        font-weight: 550;
+        font-size: 14.5px;
+      }
+      .link-card .d {
+        font-size: 13px;
+        color: var(--muted-foreground);
+      }
+      .link-card .go {
+        margin-left: auto;
+        color: var(--muted-foreground);
+        transition: transform 0.18s;
+      }
+      .link-card:hover .go {
+        transform: translateX(3px);
+        color: var(--foreground);
+      }
+
+      /* 页脚导航 */
+      .pager {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 12px;
+        margin-top: 56px;
+        padding-top: 24px;
+        border-top: 1px solid var(--border);
+      }
+      .pager a {
+        display: flex;
+        flex-direction: column;
+        gap: 3px;
+        padding: 14px 16px;
+        border: 1px solid var(--border);
+        border-radius: var(--radius);
+        background: var(--card);
+        transition: border-color 0.18s;
+      }
+      .pager a:hover {
+        border-color: var(--ring);
+      }
+      .pager .dir {
+        font-size: 12px;
+        color: var(--muted-foreground);
+      }
+      .pager .t {
+        font-weight: 550;
+        font-size: 14.5px;
+      }
+      .pager a.next {
+        text-align: right;
+      }
+      .site-footer {
+        border-top: 1px solid var(--border);
+        padding: 22px 20px;
+        text-align: center;
+        font-size: 13px;
+        color: var(--muted-foreground);
+      }
+      .site-footer code {
+        font-size: 12px;
+      }
+
+      /* 右侧目录 */
+      .toc-inner {
+        position: sticky;
+        top: 88px;
+        max-height: calc(100vh - 120px);
+        overflow-y: auto;
+        padding-left: 18px;
+      }
+      .toc-title {
+        font-size: 12px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--muted-foreground);
+        margin-bottom: 10px;
+      }
+      .toc a {
+        display: block;
+        padding: 4px 0 4px 11px;
+        font-size: 13.5px;
+        color: var(--muted-foreground);
+        border-left: 1px solid var(--border);
+        transition:
+          color 0.15s,
+          border-color 0.15s;
+      }
+      .toc a:hover {
+        color: var(--foreground);
+      }
+      .toc a.active {
+        color: var(--foreground);
+        border-left-color: var(--foreground);
+        font-weight: 500;
+      }
+
+      /* 命令面板 */
+      .palette-backdrop {
+        position: fixed;
+        inset: 0;
+        z-index: 70;
+        display: none;
+        background: rgba(0, 0, 0, 0.45);
+        padding: 12vh 16px 16px;
+      }
+      .palette-backdrop.open {
+        display: block;
+      }
+      .palette {
+        max-width: 560px;
+        margin: 0 auto;
+        background: var(--popover);
+        color: var(--popover-foreground);
+        border: 1px solid var(--border);
+        border-radius: calc(var(--radius) * 1.2);
+        box-shadow: 0 24px 60px -18px rgba(0, 0, 0, 0.45);
+        overflow: hidden;
+        animation: pop 0.16s ease-out;
+      }
+      @keyframes pop {
+        from {
+          opacity: 0;
+          transform: translateY(-8px) scale(0.985);
+        }
+        to {
+          opacity: 1;
+          transform: none;
+        }
+      }
+      .palette-input-wrap {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+        border-bottom: 1px solid var(--border);
+      }
+      .palette-input-wrap .icon {
+        color: var(--muted-foreground);
+      }
+      .palette-input {
+        flex: 1;
+        border: 0;
+        background: transparent;
+        outline: none;
+        font-size: 15px;
+        color: var(--foreground);
+      }
+      .palette-input::placeholder {
+        color: var(--muted-foreground);
+      }
+      .palette-list {
+        max-height: 320px;
+        overflow-y: auto;
+        padding: 6px;
+      }
+      .palette-empty {
+        padding: 26px;
+        text-align: center;
+        color: var(--muted-foreground);
+        font-size: 13.5px;
+      }
+      .palette-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 9px 10px;
+        border-radius: calc(var(--radius) * 0.7);
+        cursor: pointer;
+        font-size: 14px;
+      }
+      .palette-item .icon {
+        color: var(--muted-foreground);
+      }
+      .palette-item .t {
+        flex: 1;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .palette-item .tag {
+        font-size: 11px;
+        color: var(--muted-foreground);
+      }
+      .palette-item.sel {
+        background: var(--accent);
+        color: var(--accent-foreground);
+      }
+      .palette-item.sel .icon,
+      .palette-item.sel .tag {
+        color: var(--accent-foreground);
+      }
+      .palette-foot {
+        display: flex;
+        gap: 14px;
+        padding: 8px 14px;
+        border-top: 1px solid var(--border);
+        font-size: 11.5px;
+        color: var(--muted-foreground);
+      }
+
+      /* Toast */
+      .toast {
+        position: fixed;
+        left: 50%;
+        bottom: 26px;
+        transform: translate(-50%, 14px);
+        z-index: 80;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 10px 14px;
+        background: var(--primary);
+        color: var(--primary-foreground);
+        border-radius: calc(var(--radius) * 0.9);
+        font-size: 13.5px;
+        box-shadow: 0 12px 30px -12px rgba(0, 0, 0, 0.5);
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.2s,
+          transform 0.2s;
+      }
+      .toast.show {
+        opacity: 1;
+        transform: translate(-50%, 0);
+      }
+
+      /* 返回顶部 */
+      .to-top {
+        position: fixed;
+        right: 20px;
+        bottom: 20px;
+        z-index: 40;
+        width: 38px;
+        height: 38px;
+        border-radius: 9999px;
+        border: 1px solid var(--border);
+        background: var(--popover);
+        color: var(--muted-foreground);
+        display: grid;
+        place-items: center;
+        cursor: pointer;
+        box-shadow: 0 8px 20px -10px rgba(0, 0, 0, 0.35);
+        opacity: 0;
+        pointer-events: none;
+        transition:
+          opacity 0.2s,
+          color 0.15s;
+      }
+      .to-top.show {
+        opacity: 1;
+        pointer-events: auto;
+      }
+      .to-top:hover {
+        color: var(--foreground);
+      }
+
+      /* ============================================================ 响应式 */
+      @media (min-width: 640px) {
+        .header-nav {
+          display: flex;
+        }
+        .lang-switch {
+          display: flex;
+        }
+        .progress-pill {
+          display: inline-flex;
+        }
+        .pager {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+      @media (min-width: 1024px) {
+        .layout {
+          grid-template-columns: 268px minmax(0, 1fr);
+        }
+        .only-mobile {
+          display: none;
+        }
+        .sidebar {
+          position: sticky;
+          top: 56px;
+          height: calc(100vh - 56px);
+          transform: none;
+          z-index: 30;
+          align-self: start;
+        }
+        .scrim {
+          display: none;
+        }
+        .content-grid {
+          grid-template-columns: minmax(0, 1fr) 208px;
+          padding: 40px 32px 120px;
+        }
+        .toc {
+          display: block;
+        }
+      }
+      @media (min-width: 1280px) {
+        .content-grid {
+          padding-left: 48px;
+          padding-right: 48px;
+          gap: 60px;
+        }
+      }
+      @media (max-width: 1023px) {
+        .search-trigger {
+          min-width: 0;
+          width: 32px;
+          padding: 0;
+          justify-content: center;
+        }
+        .search-trigger .label,
+        .search-trigger .kbd {
+          display: none;
+        }
+        .sidebar-head {
+          display: flex;
+        }
+      }
+      @media (max-width: 639px) {
+        h1 {
+          font-size: 27px;
+        }
+        .lede {
+          font-size: 15.5px;
+        }
+        h2 {
+          font-size: 20px;
+        }
+        .brand-name span {
+          display: none;
+        }
+        .header-sep {
+          display: none;
+        }
+        .content-grid {
+          padding: 24px 16px 80px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="read-progress"><i id="readProgress"></i></div>
+
+    <!-- ============================== 图标精灵 ============================== -->
+    <svg
+      xmlns="http://www.w3.org/2000/svg"
+      style="display: none"
+      aria-hidden="true"
+    >
+      <symbol
+        id="i-search"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="11" cy="11" r="8" />
+        <path d="m21 21-4.3-4.3" />
+      </symbol>
+      <symbol
+        id="i-sun"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="4" />
+        <path
+          d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M6.3 17.7l-1.4 1.4M19.1 4.9l-1.4 1.4"
+        />
+      </symbol>
+      <symbol
+        id="i-moon"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M12 3a6.4 6.4 0 0 0 9.9 9.9A9 9 0 1 1 12 3Z" />
+      </symbol>
+      <symbol
+        id="i-github"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M15 22v-4a4.8 4.8 0 0 0-1-3.5c3 0 6-2 5.5-5.5a4.4 4.4 0 0 0-1-3.5c.3-1.1.3-2.3 0-3.5 0 0-1 0-3 1.5-2.6-.5-5.3-.5-8 0C6 2 5 2 5 2c-.3 1.2-.3 2.4 0 3.5A4.4 4.4 0 0 0 4 9c-.5 3.5 2.5 5.5 5.5 5.5-.4.5-.7 1-1 1.5v4"
+        />
+        <path d="M9 18c-4.5 2-5-2-7-2" />
+      </symbol>
+      <symbol
+        id="i-menu"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+      >
+        <path d="M4 6h16M4 12h16M4 18h16" />
+      </symbol>
+      <symbol
+        id="i-x"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+      >
+        <path d="M18 6 6 18M6 6l12 12" />
+      </symbol>
+      <symbol
+        id="i-copy"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect width="13" height="13" x="9" y="9" rx="2" />
+        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+      </symbol>
+      <symbol
+        id="i-check"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M20 6 9 17l-5-5" />
+      </symbol>
+      <symbol
+        id="i-chevron-right"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m9 18 6-6-6-6" />
+      </symbol>
+      <symbol
+        id="i-arrow-right"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M5 12h14M12 5l7 7-7 7" />
+      </symbol>
+      <symbol
+        id="i-arrow-up"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m5 12 7-7 7 7M12 19V5" />
+      </symbol>
+      <symbol
+        id="i-book"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20" />
+        <path
+          d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 17.5v-15A2.5 2.5 0 0 1 6.5 2Z"
+        />
+      </symbol>
+      <symbol
+        id="i-code"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m16 18 6-6-6-6M8 6l-6 6 6 6" />
+      </symbol>
+      <symbol
+        id="i-terminal"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="m16 18 6-6-6-6M2 6v12h20" />
+      </symbol>
+      <symbol
+        id="i-layers"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="m12.8 2.7 8.1 4a2 2 0 0 1 0 3.5l-8.1 4a2 2 0 0 1-1.7 0l-8.1-4a2 2 0 0 1 0-3.5l8.1-4a2 2 0 0 1 1.7 0Z"
+        />
+        <path
+          d="m22 12.5-9.2 4.5a2 2 0 0 1-1.7 0l-9.2-4.5M22 17.5l-9.2 4.5a2 2 0 0 1-1.7 0l-9.2-4.5"
+        />
+      </symbol>
+      <symbol
+        id="i-cpu"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <rect width="16" height="16" x="4" y="4" rx="2" />
+        <rect width="6" height="6" x="9" y="9" rx="1" />
+        <path d="M15 2v2M15 20v2M2 15h2M2 9h2M20 15h2M20 9h2M9 2v2M9 20v2" />
+      </symbol>
+      <symbol
+        id="i-package"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="M11 21.7a2 2 0 0 0 1.4.6l7.3-4.2a2 2 0 0 0 1-1.7V7.6a2 2 0 0 0-1-1.7l-7.3-4.2a2 2 0 0 0-1.4 0l-7.3 4.2a2 2 0 0 0-1 1.7v8.4a2 2 0 0 0 1 1.7Z"
+        />
+        <path d="m7.5 4.3 9 5.2M21 16l-9.5-5.5L2 16M12 22V9.9" />
+      </symbol>
+      <symbol
+        id="i-alert"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path
+          d="m21.7 18-8-14a2 2 0 0 0-3.4 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.7-3Z"
+        />
+        <path d="M12 9v4M12 17h.01" />
+      </symbol>
+      <symbol
+        id="i-info"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4M12 8h.01" />
+      </symbol>
+      <symbol
+        id="i-sparkles"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M9.9 2.1 12 7l4.9 2-4.9 2L12 16l-2.1-4.9L5 9l4.9-2Z" />
+        <path d="M19 14.5 20 18l3.5 1-3.5 1-1 3.5-1-3.5L14.5 19l3.5-1Z" />
+      </symbol>
+      <symbol
+        id="i-git-branch"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M6 3v12" />
+        <circle cx="18" cy="6" r="3" />
+        <circle cx="6" cy="18" r="3" />
+        <path d="M18 9a9 9 0 0 1-9 9" />
+      </symbol>
+      <symbol
+        id="i-target"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <circle cx="12" cy="12" r="6" />
+        <circle cx="12" cy="12" r="2" />
+      </symbol>
+      <symbol
+        id="i-compass"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <circle cx="12" cy="12" r="10" />
+        <path d="m16.2 7.8-2.1 6.3-6.3 2.1 2.1-6.3Z" />
+      </symbol>
+      <symbol
+        id="i-zap"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M13 2 3 14h9l-1 8 10-12h-9l1-8Z" />
+      </symbol>
+      <symbol
+        id="i-file"
+        viewBox="0 0 24 24"
+        fill="none"
+        stroke="currentColor"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+      >
+        <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+        <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+      </symbol>
+    </svg>
+
+    <!-- ============================== 顶栏 ============================== -->
+    <header class="site-header">
+      <button class="icon-btn only-mobile" id="menuBtn" aria-label="打开导航">
+        <svg class="icon"><use href="#i-menu" /></svg>
+      </button>
+
+      <a class="brand" href="#top">
+        <span class="brand-mark">P</span>
+        <span class="brand-name">Polyglot <span>· 编程语言学习文档</span></span>
+      </a>
+
+      <div class="header-sep"></div>
+      <nav class="header-nav">
+        <a href="#overview" aria-current="page">文档</a>
+        <a href="#roadmap">学习路线</a>
+        <a href="#resources">资源</a>
+        <a href="#pitfalls">速查</a>
+      </nav>
+
+      <div class="header-spacer"></div>
+
+      <button class="search-trigger" id="searchBtn" aria-label="搜索文档">
+        <svg class="icon"><use href="#i-search" /></svg>
+        <span class="label">搜索文档…</span>
+        <span class="kbd">⌘K</span>
+      </button>
+
+      <div
+        class="lang-switch"
+        id="globalLang"
+        role="group"
+        aria-label="示例代码语言"
+      >
+        <button type="button" data-lang="typescript">TS</button>
+        <button type="button" data-lang="python">Py</button>
+        <button type="button" data-lang="rust">Rs</button>
+        <button type="button" data-lang="go">Go</button>
+      </div>
+
+      <div class="progress-pill" id="progressPill" title="学习进度">
+        <svg class="ring" viewBox="0 0 36 36">
+          <circle class="bg" cx="18" cy="18" r="15" />
+          <circle
+            class="fg"
+            id="progressRing"
+            cx="18"
+            cy="18"
+            r="15"
+            stroke-dasharray="94.2"
+            stroke-dashoffset="94.2"
+          />
+        </svg>
+        <span id="progressText">0/14</span>
+      </div>
+
+      <a
+        class="icon-btn"
+        href="https://github.com"
+        target="_blank"
+        rel="noreferrer"
+        aria-label="GitHub"
+        ><svg class="icon"><use href="#i-github" /></svg
+      ></a>
+      <button class="icon-btn" id="themeBtn" aria-label="切换主题">
+        <svg class="icon" id="themeIcon"><use href="#i-moon" /></svg>
+      </button>
+    </header>
+
+    <!-- ============================== 布局 ============================== -->
+    <div class="layout">
+      <!-- 侧边栏 -->
+      <aside class="sidebar" id="sidebar">
+        <div class="sidebar-head">
+          <span class="nav-group-title" style="padding: 0">文档导航</span>
+          <button
+            class="icon-btn only-mobile"
+            id="closeSidebarBtn"
+            aria-label="关闭导航"
+          >
+            <svg class="icon"><use href="#i-x" /></svg>
+          </button>
+        </div>
+
+        <div class="nav-group">
+          <div class="nav-group-title">开始</div>
+          <a class="nav-link" href="#overview" data-section="overview"
+            ><svg class="icon"><use href="#i-compass" /></svg>概述<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#usage" data-section="usage"
+            ><svg class="icon"><use href="#i-book" /></svg>如何使用本指南<span
+              class="dot"
+            ></span
+          ></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">核心语法</div>
+          <a class="nav-link" href="#variables" data-section="variables"
+            ><svg class="icon"><use href="#i-code" /></svg>变量与类型<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#control-flow" data-section="control-flow"
+            ><svg class="icon"><use href="#i-code" /></svg>控制流<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#functions" data-section="functions"
+            ><svg class="icon"><use href="#i-code" /></svg>函数<span
+              class="dot"
+            ></span
+          ></a>
+          <a
+            class="nav-link"
+            href="#data-structures"
+            data-section="data-structures"
+            ><svg class="icon"><use href="#i-layers" /></svg>数据结构<span
+              class="dot"
+            ></span
+          ></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">类型与设计</div>
+          <a class="nav-link" href="#oop" data-section="oop"
+            ><svg class="icon"><use href="#i-layers" /></svg>面向对象<span
+              class="dot"
+            ></span
+          ></a>
+          <a
+            class="nav-link"
+            href="#error-handling"
+            data-section="error-handling"
+            ><svg class="icon"><use href="#i-alert" /></svg>错误处理<span
+              class="dot"
+            ></span
+          ></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">工程实践</div>
+          <a class="nav-link" href="#concurrency" data-section="concurrency"
+            ><svg class="icon"><use href="#i-cpu" /></svg>并发模型<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#modules" data-section="modules"
+            ><svg class="icon"><use href="#i-package" /></svg>模块与依赖<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#performance" data-section="performance"
+            ><svg class="icon"><use href="#i-zap" /></svg>性能与内存<span
+              class="dot"
+            ></span
+          ></a>
+        </div>
+        <div class="nav-group">
+          <div class="nav-group-title">深入</div>
+          <a class="nav-link" href="#pitfalls" data-section="pitfalls"
+            ><svg class="icon"><use href="#i-alert" /></svg>常见陷阱<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#roadmap" data-section="roadmap"
+            ><svg class="icon"><use href="#i-target" /></svg>学习路线<span
+              class="dot"
+            ></span
+          ></a>
+          <a class="nav-link" href="#resources" data-section="resources"
+            ><svg class="icon"><use href="#i-book" /></svg>学习资源<span
+              class="dot"
+            ></span
+          ></a>
+        </div>
+
+        <div class="sidebar-footer">
+          <strong>Polyglot Docs</strong><br />
+          基于 shadcn/ui 默认主题构建 ·
+          <a href="https://ui.shadcn.com" target="_blank" rel="noreferrer"
+            >查看组件库</a
+          >
+        </div>
+      </aside>
+
+      <div class="content-wrap">
+        <div class="content-grid">
+          <!-- ============================== 正文 ============================== -->
+          <article class="article" id="top">
+            <div class="breadcrumb">
+              <a href="#overview">文档</a><span class="sep">/</span>
+              <a href="#overview">编程语言</a><span class="sep">/</span>
+              <span>学习指南</span>
+            </div>
+
+            <h1>编程语言学习指南</h1>
+            <p class="lede">
+              一份面向现代编程语言的系统性文档。我们从类型系统讲到内存布局，从并发模型讲到依赖治理，
+              用同一组示例对比 TypeScript、Python、Rust 与
+              Go，帮助你建立可迁移的编程心智模型。
+            </p>
+
+            <div class="meta-row">
+              <span class="badge"
+                ><svg class="icon"><use href="#i-sparkles" /></svg
+                >持续更新</span
+              >
+              <span class="badge outline">约 45 分钟阅读</span>
+              <span class="badge outline">4 种语言对照</span>
+              <span class="badge outline">14 个章节</span>
+            </div>
+
+            <!-- ---------- 进度卡片 ---------- -->
+            <div class="card progress-card">
+              <div class="top">
+                <strong>你的学习进度</strong>
+                <span id="progressLabel">0 / 14 个章节已掌握</span>
+              </div>
+              <div class="progress-bar"><i id="progressFill"></i></div>
+              <p class="hint">
+                点击每个章节标题右侧的圆圈标记「已掌握」，进度会保存在本地浏览器中。
+              </p>
+            </div>
+
+            <!-- ---------- 概述 ---------- -->
+            <section id="overview" data-checkable>
+              <h2>
+                <a class="anchor" href="#overview" aria-label="链接到概述">#</a>
+                概述
+                <button
+                  class="section-check"
+                  data-check="overview"
+                  aria-label="标记概述为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+
+              <p>
+                学习一门编程语言，本质上是学习三件事：<strong>它的表达能力</strong>（能写什么）、
+                <strong>它的运行模型</strong
+                >（怎么跑）以及<strong>它的工程约束</strong>（如何长期维护）。
+                只学语法往往意味着只学了三分之一。
+              </p>
+
+              <div class="card-grid">
+                <div class="card">
+                  <div class="card-ico">
+                    <svg class="icon icon-lg"><use href="#i-layers" /></svg>
+                  </div>
+                  <div class="card-title">类型系统</div>
+                  <p class="card-desc">
+                    静态 vs 动态、结构化 vs 名义化、名义 vs
+                    结构子类型。类型系统决定了你能把多少错误挡在编译期。
+                  </p>
+                </div>
+                <div class="card">
+                  <div class="card-ico">
+                    <svg class="icon icon-lg"><use href="#i-cpu" /></svg>
+                  </div>
+                  <div class="card-title">内存与生命周期</div>
+                  <p class="card-desc">
+                    栈与堆、所有权、GC
+                    与引用计数。内存布局是理解性能问题的前提。
+                  </p>
+                </div>
+                <div class="card">
+                  <div class="card-ico">
+                    <svg class="icon icon-lg"><use href="#i-git-branch" /></svg>
+                  </div>
+                  <div class="card-title">并发模型</div>
+                  <p class="card-desc">
+                    线程、协程、消息传递与数据竞争。并发决定了你的系统能扛住多少并发。
+                  </p>
+                </div>
+                <div class="card">
+                  <div class="card-ico">
+                    <svg class="icon icon-lg"><use href="#i-package" /></svg>
+                  </div>
+                  <div class="card-title">工程化</div>
+                  <p class="card-desc">
+                    模块边界、包管理、测试与工具链。决定了代码能否活过一年。
+                  </p>
+                </div>
+              </div>
+
+              <h3>
+                <a
+                  class="anchor"
+                  href="#overview-compare"
+                  aria-label="链接到语言谱系对比"
+                  >#</a
+                >四种语言的定位对比
+              </h3>
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>维度</th>
+                      <th>TypeScript</th>
+                      <th>Python</th>
+                      <th>Rust</th>
+                      <th>Go</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>类型检查</td>
+                      <td>静态（渐进式）</td>
+                      <td>动态（可选注解）</td>
+                      <td>静态（强类型）</td>
+                      <td>静态（强类型）</td>
+                    </tr>
+                    <tr>
+                      <td>执行模型</td>
+                      <td>编译到 JS</td>
+                      <td>解释执行（CPython）</td>
+                      <td>编译为本地码（AOT）</td>
+                      <td>编译为本地码（AOT）</td>
+                    </tr>
+                    <tr>
+                      <td>内存管理</td>
+                      <td>由运行时（GC）</td>
+                      <td>引用计数 + GC</td>
+                      <td>所有权 + 借用检查</td>
+                      <td>并发标记清除 GC</td>
+                    </tr>
+                    <tr>
+                      <td>并发原语</td>
+                      <td>事件循环 + Promise</td>
+                      <td>GIL + asyncio</td>
+                      <td>线程 + async/await</td>
+                      <td>Goroutine + Channel</td>
+                    </tr>
+                    <tr>
+                      <td>泛型</td>
+                      <td>结构化、类型擦除</td>
+                      <td>鸭子类型</td>
+                      <td>单态化、无 trait object</td>
+                      <td>编译期实例化</td>
+                    </tr>
+                    <tr>
+                      <td>典型场景</td>
+                      <td>Web 前端 / Node 服务</td>
+                      <td>数据科学 / 脚本 / 后端</td>
+                      <td>系统级 / 高性能服务</td>
+                      <td>云原生 / 微服务</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="alert info">
+                <svg class="icon"><use href="#i-info" /></svg>
+                <div>
+                  <div class="alert-title">不要把语言当信仰</div>
+                  <p>
+                    每种语言都是为特定约束设计的权衡结果。遇到性能问题时，先质疑数据结构与算法，再考虑换语言。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 使用指南 ---------- -->
+            <section id="usage" data-checkable>
+              <h2>
+                <a
+                  class="anchor"
+                  href="#usage"
+                  aria-label="链接到如何使用本指南"
+                  >#</a
+                >
+                如何使用本指南
+                <button
+                  class="section-check"
+                  data-check="usage"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                本页所有代码块都支持
+                <strong>TypeScript / Python / Rust / Go</strong>
+                四种语言的对照。 你可以用顶栏的
+                <span class="inline-code">TS / Py / Rs / Go</span>
+                一次切换全部示例，
+                也可以点击单个代码块左上角的语言标签，只切换那一个块。
+              </p>
+              <ul>
+                <li>
+                  按 <span class="inline-code">⌘K</span> /
+                  <span class="inline-code">Ctrl + K</span>
+                  打开搜索，快速跳转到任意章节。
+                </li>
+                <li>代码块右上角的「复制」按钮会复制当前语言的完整代码。</li>
+                <li>
+                  章节标题右侧的圆圈用于标记掌握状态，进度保存在
+                  <span class="inline-code">localStorage</span>。
+                </li>
+                <li>右上角图标可切换浅色 / 深色主题，默认跟随系统设置。</li>
+              </ul>
+              <div class="alert tip">
+                <svg class="icon"><use href="#i-sparkles" /></svg>
+                <div>
+                  <div class="alert-title">建议的阅读方式</div>
+                  <p>
+                    先通读「概述」与「学习路线」建立全局观，再挑一个你还不熟悉的章节深入。同一概念在四种语言里的差异，往往比单个语言的细节更值得注意。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 变量与类型 ---------- -->
+            <section id="variables" data-checkable>
+              <h2>
+                <a
+                  class="anchor"
+                  href="#variables"
+                  aria-label="链接到变量与类型"
+                  >#</a
+                >
+                变量与类型
+                <button
+                  class="section-check"
+                  data-check="variables"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                声明变量时是否需要显式标注类型，是四种语言最直观的分水岭：TypeScript
+                鼓励标注、 Python 允许标注但不强制、Rust 要求标注、Go
+                使用类型推断但不允许函数体内重新声明。
+              </p>
+
+              <div class="code-block" data-code="variables"></div>
+
+              <div class="alert warn">
+                <svg class="icon"><use href="#i-alert" /></svg>
+                <div>
+                  <div class="alert-title">Rust 的字符串不是 String</div>
+                  <p>
+                    <code class="inline-code">&amp;str</code>
+                    是不可变切片（借用一段只读内存），<code class="inline-code"
+                      >String</code
+                    >
+                    是堆上可增长缓冲区。函数参数优先接收
+                    <code class="inline-code">&amp;str</code
+                    >，只有在需要持有时才转成
+                    <code class="inline-code">String</code>。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 控制流 ---------- -->
+            <section id="control-flow" data-checkable>
+              <h2>
+                <a class="anchor" href="#control-flow" aria-label="链接到控制流"
+                  >#</a
+                >
+                控制流
+                <button
+                  class="section-check"
+                  data-check="control-flow"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                四种语言都有
+                <span class="inline-code">if</span> 与循环，但形态差异明显：
+                Python 依靠缩进而非括号，Rust 的
+                <span class="inline-code">match</span> 必须穷尽所有分支， Go 的
+                <span class="inline-code">switch</span> 默认不穿透，Python 的
+                <span class="inline-code">match</span> 行为接近它。
+              </p>
+
+              <div class="code-block" data-code="control-flow"></div>
+
+              <div class="alert info">
+                <svg class="icon"><use href="#i-info" /></svg>
+                <div>
+                  <div class="alert-title">遍历时修改集合</div>
+                  <p>
+                    在四种语言中，遍历期间删除元素都可能是未定义行为或直接报错。安全做法是先收集要处理的项，再统一修改集合。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 函数 ---------- -->
+            <section id="functions" data-checkable>
+              <h2>
+                <a class="anchor" href="#functions" aria-label="链接到函数"
+                  >#</a
+                >
+                函数
+                <button
+                  class="section-check"
+                  data-check="functions"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                函数是一等公民，意味着函数可以作为参数传递、作为返回值返回、存入容器。
+                Python 与 TypeScript 直接支持闭包与匿名函数；Rust 通过 trait
+                约束实现同样能力；Go 则用函数类型表达。
+              </p>
+
+              <div class="code-block" data-code="functions"></div>
+            </section>
+
+            <!-- ---------- 数据结构 ---------- -->
+            <section id="data-structures" data-checkable>
+              <h2>
+                <a
+                  class="anchor"
+                  href="#data-structures"
+                  aria-label="链接到数据结构"
+                  >#</a
+                >
+                数据结构
+                <button
+                  class="section-check"
+                  data-check="data-structures"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                标准库的容器差异是日常开发中最常遇到的「语言手感」来源。
+                下面这张表列出了四种语言最常用的集合类型与它们的复杂度特征。
+              </p>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>结构</th>
+                      <th>TypeScript</th>
+                      <th>Python</th>
+                      <th>Rust</th>
+                      <th>Go</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>动态数组</td>
+                      <td><code>Array</code></td>
+                      <td><code>list</code></td>
+                      <td><code>Vec</code></td>
+                      <td><code>[]T</code></td>
+                    </tr>
+                    <tr>
+                      <td>固定长度</td>
+                      <td><code>readonly T[]</code></td>
+                      <td><code>tuple</code></td>
+                      <td><code>[T; N]</code></td>
+                      <td><code>[N]T</code></td>
+                    </tr>
+                    <tr>
+                      <td>键值映射</td>
+                      <td><code>Map</code> / <code>Record</code></td>
+                      <td><code>dict</code></td>
+                      <td><code>HashMap</code></td>
+                      <td><code>map[K]V</code></td>
+                    </tr>
+                    <tr>
+                      <td>去重集合</td>
+                      <td><code>Set</code></td>
+                      <td><code>set</code></td>
+                      <td><code>HashSet</code></td>
+                      <td><code>map[T]bool</code></td>
+                    </tr>
+                    <tr>
+                      <td>栈 / 队列</td>
+                      <td>数组 <code>push/pop/shift</code></td>
+                      <td><code>collections.deque</code></td>
+                      <td><code>Vec</code></td>
+                      <td><code>slice</code></td>
+                    </tr>
+                    <tr>
+                      <td>有序映射</td>
+                      <td><code>Map</code>（保持插入序）</td>
+                      <td><code>dict</code>（保持插入序）</td>
+                      <td><code>BTreeMap</code></td>
+                      <td>需第三方库</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="code-block" data-code="data-structures"></div>
+
+              <div class="alert tip">
+                <svg class="icon"><use href="#i-sparkles" /></svg>
+                <div>
+                  <div class="alert-title">复杂度速记</div>
+                  <p>
+                    数组/列表按索引访问均为 O(1)，但 Python
+                    <code class="inline-code">list.insert(0, x)</code> 是
+                    O(n)；哈希表的平均查找是 O(1)，最坏 O(n)；Go 的 map
+                    在并发写入时必须加锁，而 Rust 与 TS 的
+                    <code class="inline-code">HashMap</code> 不是线程安全的。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 面向对象 ---------- -->
+            <section id="oop" data-checkable>
+              <h2>
+                <a class="anchor" href="#oop" aria-label="链接到面向对象">#</a>
+                面向对象与类型系统
+                <button
+                  class="section-check"
+                  data-check="oop"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                面向对象的「三大特征」在现代语言里已经分化：继承被组合替代，虚函数表被
+                trait/interface 替代，
+                封装则始终保留。关键差异在于多态的实现方式——Rust 与 Go
+                采用<strong>静态分发</strong>， TypeScript
+                在多数场景下是<strong>动态分发</strong>。
+              </p>
+
+              <div class="code-block" data-code="oop"></div>
+            </section>
+
+            <!-- ---------- 错误处理 ---------- -->
+            <section id="error-handling" data-checkable>
+              <h2>
+                <a
+                  class="anchor"
+                  href="#error-handling"
+                  aria-label="链接到错误处理"
+                  >#</a
+                >
+                错误处理
+                <button
+                  class="section-check"
+                  data-check="error-handling"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                错误处理是语言设计哲学差异最大的地方：Go
+                用显式返回值表达失败，Rust 用
+                <span class="inline-code">Result</span>，Python
+                用异常，TypeScript 两者皆可。
+                关键在于<strong>错误是不可恢复的业务分支，还是意料之外的崩溃</strong>。
+              </p>
+
+              <div class="code-block" data-code="error-handling"></div>
+
+              <div class="alert warn">
+                <svg class="icon"><use href="#i-alert" /></svg>
+                <div>
+                  <div class="alert-title">不要吞掉错误</div>
+                  <p>
+                    空的 <code class="inline-code">catch</code> 块、返回
+                    <code class="inline-code">nil, nil</code>、忽略
+                    <code class="inline-code">err</code>
+                    都会把问题推迟到更难排查的地方。要么处理它，要么带着上下文继续上抛。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 并发 ---------- -->
+            <section id="concurrency" data-checkable>
+              <h2>
+                <a
+                  class="anchor"
+                  href="#concurrency"
+                  aria-label="链接到并发模型"
+                  >#</a
+                >
+                并发模型
+                <button
+                  class="section-check"
+                  data-check="concurrency"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                并发的难点从来不是「同时跑几个任务」，而是<strong>共享可变状态</strong>。
+                主流解法有两条路：用锁保护共享数据（线程），或用消息传递隔离状态（协程）。
+                Go 的 goroutine + channel 是后者的极致，Rust
+                的所有权则是「连数据竞争都不让你写」。
+              </p>
+
+              <div class="code-block" data-code="concurrency"></div>
+
+              <div class="alert info">
+                <svg class="icon"><use href="#i-info" /></svg>
+                <div>
+                  <div class="alert-title">并发 ≠ 并行</div>
+                  <p>
+                    并发是「同时处理多件事」的抽象，并行是「同一时刻真的在多核上跑」。单核也能并发，只是靠时间片轮转切换。写代码时应当以「任务是否相互独立」而非「是否需要多核」来思考并发。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 模块 ---------- -->
+            <section id="modules" data-checkable>
+              <h2>
+                <a class="anchor" href="#modules" aria-label="链接到模块与依赖"
+                  >#</a
+                >
+                模块与依赖管理
+                <button
+                  class="section-check"
+                  data-check="modules"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                现代语言都在往「统一工具链 +
+                声明式清单」的方向收敛。区别在于清单文件的名字和解析格式，
+                以及生态是否做到了「依赖只有一个版本」（单版本解析）。
+              </p>
+
+              <div class="table-wrap">
+                <table>
+                  <thead>
+                    <tr>
+                      <th>生态</th>
+                      <th>清单文件</th>
+                      <th>安装工具</th>
+                      <th>特点</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Node.js</td>
+                      <td><code>package.json</code></td>
+                      <td><code>pnpm</code> / <code>npm</code></td>
+                      <td>lockfile 严格解析，单版本树</td>
+                    </tr>
+                    <tr>
+                      <td>Python</td>
+                      <td><code>pyproject.toml</code></td>
+                      <td><code>uv</code> / <code>poetry</code></td>
+                      <td>标准库虚拟环境隔离</td>
+                    </tr>
+                    <tr>
+                      <td>Rust</td>
+                      <td><code>Cargo.toml</code></td>
+                      <td><code>cargo</code></td>
+                      <td>内置于工具链，语义化版本严格</td>
+                    </tr>
+                    <tr>
+                      <td>Go</td>
+                      <td><code>go.mod</code></td>
+                      <td><code>go get</code></td>
+                      <td>最小版本选择（MVS），构建极快</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div class="code-block" data-code="modules"></div>
+            </section>
+
+            <!-- ---------- 性能 ---------- -->
+            <section id="performance" data-checkable>
+              <h2>
+                <a
+                  class="anchor"
+                  href="#performance"
+                  aria-label="链接到性能与内存"
+                  >#</a
+                >
+                性能与内存
+                <button
+                  class="section-check"
+                  data-check="performance"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                性能问题 90% 出在算法复杂度与内存分配上，而不是语言本身。
+                常见误区是过早优化：先用工具测量，再决定是否优化。
+              </p>
+
+              <div class="code-block" data-code="performance"></div>
+
+              <div class="alert tip">
+                <svg class="icon"><use href="#i-sparkles" /></svg>
+                <div>
+                  <div class="alert-title">先测量，再优化</div>
+                  <p>
+                    用语言自带的 profiler（<code class="inline-code"
+                      >node --prof</code
+                    >、<code class="inline-code">cProfile</code>、<code
+                      class="inline-code"
+                      >cargo flamegraph</code
+                    >、<code class="inline-code">go test -bench</code
+                    >）找到真正的热点，再动手改。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 陷阱 ---------- -->
+            <section id="pitfalls" data-checkable>
+              <h2>
+                <a class="anchor" href="#pitfalls" aria-label="链接到常见陷阱"
+                  >#</a
+                >
+                常见陷阱
+                <button
+                  class="section-check"
+                  data-check="pitfalls"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>下面是跨语言最常踩的几个坑，点击展开查看原因与规避方式。</p>
+
+              <div class="accordion" id="pitfallAccordion">
+                <div class="acc-item">
+                  <button class="acc-trigger">
+                    <svg class="icon"><use href="#i-alert" /></svg>Python
+                    可变默认参数被共享<svg class="icon chev">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </button>
+                  <div class="acc-panel">
+                    <p>
+                      默认参数在函数<strong>定义时</strong>求值一次，因此同一个列表会被所有调用共享，反复调用会不断累积元素。
+                    </p>
+                    <p>
+                      <span class="inline-code">def f(items=[]):</span> →
+                      <span class="inline-code"
+                        >def f(items=None): items = items or []</span
+                      >
+                    </p>
+                  </div>
+                </div>
+                <div class="acc-item">
+                  <button class="acc-trigger">
+                    <svg class="icon"><use href="#i-alert" /></svg>Go
+                    循环变量捕获陷阱<svg class="icon chev">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </button>
+                  <div class="acc-panel">
+                    <p>
+                      Go 1.22 之前，循环变量在所有迭代中共享同一个地址，闭包或
+                      goroutine 捕获它会导致全部拿到最后一个值。1.22
+                      起每个迭代拥有独立变量，语义与其他语言一致。
+                    </p>
+                    <p>
+                      显式传参（<span class="inline-code"
+                        >go func(v int) {...}(v)</span
+                      >）在旧版本中依然是最稳妥写法。
+                    </p>
+                  </div>
+                </div>
+                <div class="acc-item">
+                  <button class="acc-trigger">
+                    <svg class="icon"><use href="#i-alert" /></svg>JavaScript 的
+                    == 与自动类型转换<svg class="icon chev">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </button>
+                  <div class="acc-panel">
+                    <p>
+                      <span class="inline-code">"0" == false</span> 为
+                      <span class="inline-code">true</span
+                      >，因为字符串会被转换成布尔值。始终使用
+                      <span class="inline-code">===</span> 与
+                      <span class="inline-code">!==</span>，TypeScript
+                      的严格相等检查能替你避开这类问题。
+                    </p>
+                  </div>
+                </div>
+                <div class="acc-item">
+                  <button class="acc-trigger">
+                    <svg class="icon"><use href="#i-alert" /></svg>Rust
+                    的借用与所有权冲突<svg class="icon chev">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </button>
+                  <div class="acc-panel">
+                    <p>
+                      同一时刻要么只有一个可变引用，要么可以有多个不可变引用。当借用冲突时，先考虑重排作用域、克隆小数据，或改用
+                      <span class="inline-code">Rc</span> /
+                      <span class="inline-code">Arc</span>。
+                    </p>
+                  </div>
+                </div>
+                <div class="acc-item">
+                  <button class="acc-trigger">
+                    <svg class="icon"><use href="#i-alert" /></svg>TypeScript 的
+                    any 扩散<svg class="icon chev">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </button>
+                  <div class="acc-panel">
+                    <p>
+                      一个
+                      <span class="inline-code">any</span>
+                      会让整条推导链失去类型保护。优先用
+                      <span class="inline-code">unknown</span
+                      >（需要先收窄才能使用）或具体的泛型参数。
+                    </p>
+                  </div>
+                </div>
+                <div class="acc-item">
+                  <button class="acc-trigger">
+                    <svg class="icon"><use href="#i-alert" /></svg
+                    >浮点数不精确<svg class="icon chev">
+                      <use href="#i-chevron-right" />
+                    </svg>
+                  </button>
+                  <div class="acc-panel">
+                    <p>
+                      0.1 + 0.2 不等于 0.3
+                      在所有语言中都成立。金额计算请用整数分或十进制定点数类型（如
+                      Python 的
+                      <span class="inline-code">decimal.Decimal</span>）。
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 学习路线 ---------- -->
+            <section id="roadmap" data-checkable>
+              <h2>
+                <a class="anchor" href="#roadmap" aria-label="链接到学习路线"
+                  >#</a
+                >
+                学习路线
+                <button
+                  class="section-check"
+                  data-check="roadmap"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                下面是一条为「已掌握一门语言，想理解不同范式」的人准备的 12
+                周路径。
+                每阶段都以可交付的小项目结束，避免陷入「只看书不写代码」。
+              </p>
+
+              <div class="steps">
+                <div class="step">
+                  <div class="step-num">1</div>
+                  <div class="step-title">第 1–2 周：类型系统直觉</div>
+                  <p class="step-desc">
+                    读懂四种语言的类型声明与推断规则，写一个「JSON 校验
+                    CLI」，对比各自的类型表达能力。
+                  </p>
+                </div>
+                <div class="step">
+                  <div class="step-num">2</div>
+                  <div class="step-title">第 3–4 周：内存与数据布局</div>
+                  <p class="step-desc">
+                    用 <span class="inline-code">sizeof</span> /
+                    <span class="inline-code">sys.getsizeof</span> /
+                    <span class="inline-code">size_of::&lt;T&gt;()</span>
+                    观察结构体大小，理解对齐与 padding。
+                  </p>
+                </div>
+                <div class="step">
+                  <div class="step-num">3</div>
+                  <div class="step-title">第 5–7 周：错误处理与边界</div>
+                  <p class="step-desc">
+                    实现一个带重试与超时策略的 HTTP 客户端，比较 Result、异常与
+                    error return 三种错误模型的传播路径。
+                  </p>
+                </div>
+                <div class="step">
+                  <div class="step-num">4</div>
+                  <div class="step-title">第 8–10 周：并发压力</div>
+                  <p class="step-desc">
+                    用四种语言各实现一个带超时的并发抓取器，压测到 1000
+                    并发，记录内存与错误率曲线。
+                  </p>
+                </div>
+                <div class="step">
+                  <div class="step-num">5</div>
+                  <div class="step-title">第 11 周：工具链与工程化</div>
+                  <p class="step-desc">
+                    配置格式化、静态检查、测试覆盖率与
+                    CI，让每个项目都能一条命令跑通全部门禁。
+                  </p>
+                </div>
+                <div class="step">
+                  <div class="step-num">6</div>
+                  <div class="step-title">第 12 周：设计复盘</div>
+                  <p class="step-desc">
+                    为同一业务写两份实现（一种动态类型 +
+                    一种静态类型），写一篇对比笔记公开分享。
+                  </p>
+                </div>
+              </div>
+
+              <div class="alert tip">
+                <svg class="icon"><use href="#i-sparkles" /></svg>
+                <div>
+                  <div class="alert-title">刻意练习的两条原则</div>
+                  <p>
+                    一、一次只突破一个舒适区边界；二、练习要处在「略有难度但可完成」的区间。重复阅读文档带来的提升，远小于动手写一个跑通的程序。
+                  </p>
+                </div>
+              </div>
+            </section>
+
+            <!-- ---------- 资源 ---------- -->
+            <section id="resources" data-checkable>
+              <h2>
+                <a class="anchor" href="#resources" aria-label="链接到学习资源"
+                  >#</a
+                >
+                学习资源
+                <button
+                  class="section-check"
+                  data-check="resources"
+                  aria-label="标记本节为已掌握"
+                >
+                  <svg class="icon"><use href="#i-check" /></svg>
+                </button>
+              </h2>
+              <p>
+                精选各语言的一手资料，优先阅读官方文档与规范，其次才是二手教程。
+              </p>
+
+              <div class="link-list">
+                <a
+                  class="link-card"
+                  href="https://www.typescriptlang.org/docs/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg class="icon icon-lg"><use href="#i-code" /></svg>
+                  <span
+                    ><span class="t">TypeScript Handbook</span><br /><span
+                      class="d"
+                      >官方手册，类型系统部分写得最清楚</span
+                    ></span
+                  >
+                  <svg class="icon go"><use href="#i-arrow-right" /></svg>
+                </a>
+                <a
+                  class="link-card"
+                  href="https://docs.python.org/3/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg class="icon icon-lg"><use href="#i-code" /></svg>
+                  <span
+                    ><span class="t">Python 官方文档</span><br /><span class="d"
+                      >含 Library Reference 与 asyncio 章节</span
+                    ></span
+                  >
+                  <svg class="icon go"><use href="#i-arrow-right" /></svg>
+                </a>
+                <a
+                  class="link-card"
+                  href="https://doc.rust-lang.org/book/"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg class="icon icon-lg"><use href="#i-code" /></svg>
+                  <span
+                    ><span class="t">The Rust Book</span><br /><span class="d"
+                      >所有权与借用章节是入门关键</span
+                    ></span
+                  >
+                  <svg class="icon go"><use href="#i-arrow-right" /></svg>
+                </a>
+                <a
+                  class="link-card"
+                  href="https://go.dev/doc/effective_go"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg class="icon icon-lg"><use href="#i-code" /></svg>
+                  <span
+                    ><span class="t">Effective Go</span><br /><span class="d"
+                      >Go 社区的惯用法与风格指南</span
+                    ></span
+                  >
+                  <svg class="icon go"><use href="#i-arrow-right" /></svg>
+                </a>
+                <a
+                  class="link-card"
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg class="icon icon-lg"><use href="#i-terminal" /></svg>
+                  <span
+                    ><span class="t">动手实践仓库</span><br /><span class="d"
+                      >跟随示例代码逐节实现，全部语言覆盖</span
+                    ></span
+                  >
+                  <svg class="icon go"><use href="#i-arrow-right" /></svg>
+                </a>
+                <a
+                  class="link-card"
+                  href="https://github.com"
+                  target="_blank"
+                  rel="noreferrer"
+                >
+                  <svg class="icon icon-lg"><use href="#i-file" /></svg>
+                  <span
+                    ><span class="t">离线阅读 / 打印</span><br /><span class="d"
+                      >把本页保存为 PDF，保留代码高亮与目录结构</span
+                    ></span
+                  >
+                  <svg class="icon go"><use href="#i-arrow-right" /></svg>
+                </a>
+              </div>
+            </section>
+
+            <!-- ---------- 分页 ---------- -->
+            <nav class="pager">
+              <a href="#top" class="prev">
+                <span class="dir">回到顶部</span>
+                <span class="t">阅读进度与标记</span>
+              </a>
+              <a href="#pitfalls" class="next">
+                <span class="dir">下一节</span>
+                <span class="t">常见陷阱</span>
+              </a>
+            </nav>
+          </article>
+
+          <!-- ============================== 右侧目录 ============================== -->
+          <aside class="toc">
+            <div class="toc-inner">
+              <div class="toc-title">本页目录</div>
+              <nav id="tocNav"></nav>
+            </div>
+          </aside>
+        </div>
+
+        <footer class="site-footer">
+          <p>
+            Polyglot Docs · 使用 <code>shadcn/ui</code> 默认主题构建 ·
+            <span id="year"></span>
+          </p>
+        </footer>
+      </div>
+    </div>
+
+    <div class="scrim" id="scrim"></div>
+
+    <!-- ============================== 命令面板 ============================== -->
+    <div class="palette-backdrop" id="paletteBackdrop">
+      <div
+        class="palette"
+        role="dialog"
+        aria-modal="true"
+        aria-label="搜索文档"
+      >
+        <div class="palette-input-wrap">
+          <svg class="icon"><use href="#i-search" /></svg>
+          <input
+            class="palette-input"
+            id="paletteInput"
+            placeholder="搜索章节、关键字…"
+            autocomplete="off"
+          />
+          <span class="kbd">ESC</span>
+        </div>
+        <div class="palette-list" id="paletteList"></div>
+        <div class="palette-foot">
+          <span
+            ><span class="kbd">↑</span> <span class="kbd">↓</span> 切换</span
+          >
+          <span><span class="kbd">↵</span> 跳转</span>
+          <span><span class="kbd">ESC</span> 关闭</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast">
+      <svg class="icon"><use href="#i-check" /></svg
+      ><span id="toastText">已复制</span>
+    </div>
+
+    <button class="to-top" id="toTop" aria-label="回到顶部">
+      <svg class="icon"><use href="#i-arrow-up" /></svg>
+    </button>
+
+    <script>
+      ;(function () {
+        "use strict"
+
+        /* ==========================================================
+     代码样本：放在 JS 模板字符串里，避免 HTML 格式化工具
+     破坏代码缩进与换行。
+     ========================================================== */
+        var SAMPLES = {
+          variables: {
+            typescript: [
+              "// 显式类型标注",
+              'let name: string = "Ada";',
+              "let age: number = 36;",
+              "let active: boolean = true;",
+              "",
+              "// 联合类型",
+              'type Status = "idle" | "running" | "done";',
+              'let status: Status = "running";',
+              "",
+              "// 数组与元组",
+              'let tags: string[] = ["math", "cs"];',
+              "let point: [number, number] = [3, 4];",
+            ].join("\n"),
+            python: [
+              "# 变量无需声明类型，但推荐用注解表达意图",
+              'name: str = "Ada"',
+              "age: int = 36",
+              "active: bool = True",
+              "",
+              "# 类型别名（3.10+ 使用 Literal）",
+              "from typing import Literal",
+              "",
+              'Status = Literal["idle", "running", "done"]',
+              'status: Status = "running"',
+              "",
+              "# 容器类型",
+              'tags: list[str] = ["math", "cs"]',
+              "point: tuple[int, int] = (3, 4)",
+            ].join("\n"),
+            rust: [
+              "// 变量默认不可变，mut 表示可变",
+              'let name: &str = "Ada";',
+              "let mut age: u8 = 36;",
+              "let active: bool = true;",
+              "",
+              "// 枚举即代数数据类型",
+              "enum Status {",
+              "    Idle,",
+              "    Running,",
+              "    Done,",
+              "}",
+              "let status = Status::Running;",
+              "",
+              'let tags: Vec<String> = vec!["math".into(), "cs".into()];',
+              "let point: (i32, i32) = (3, 4);",
+            ].join("\n"),
+            go: [
+              'name := "Ada"       // 短变量声明',
+              "var age int = 36    // 显式声明",
+              "var active bool = true",
+              "",
+              "// 用字符串常量模拟枚举",
+              "type Status string",
+              "",
+              "const (",
+              '    StatusIdle    Status = "idle"',
+              '    StatusRunning Status = "running"',
+              ")",
+              "",
+              'var tags = []string{"math", "cs"}',
+              "var point = [2]int{3, 4}",
+            ].join("\n"),
+          },
+
+          "control-flow": {
+            typescript: [
+              "for (const item of items) {",
+              "  if (item.done) continue;",
+              "  console.log(item.title);",
+              "}",
+              "",
+              'const label = score >= 90 ? "A" : score >= 60 ? "B" : "C";',
+              "",
+              "switch (kind) {",
+              '  case "pdf":',
+              "    return renderPDF();",
+              '  case "csv":',
+              "    return renderCSV();",
+              "  default:",
+              '    throw new Error("未知类型: " + kind);',
+              "}",
+            ].join("\n"),
+            python: [
+              "for item in items:",
+              "    if item.done:",
+              "        continue",
+              "    print(item.title)",
+              "",
+              'label = "A" if score >= 90 else ("B" if score >= 60 else "C")',
+              "",
+              "match kind:",
+              '    case "pdf":',
+              "        return render_pdf()",
+              '    case "csv":',
+              "        return render_csv()",
+              "    case _:",
+              '        raise ValueError(f"未知类型: {kind}")',
+            ].join("\n"),
+            rust: [
+              "for item in &items {",
+              "    if item.done {",
+              "        continue;",
+              "    }",
+              '    println!("{}", item.title);',
+              "}",
+              "",
+              "// if 是表达式，可以直接产生值",
+              'let label = if score >= 90 { "A" } else { "B" };',
+              "",
+              "// match 必须穷尽所有可能",
+              "match kind {",
+              "    Kind::Pdf => render_pdf()?,",
+              "    Kind::Csv => render_csv()?,",
+              "    other => return Err(Error::Unknown(other)),",
+              "}",
+            ].join("\n"),
+            go: [
+              "for _, item := range items {",
+              "    if item.Done {",
+              "        continue",
+              "    }",
+              "    fmt.Println(item.Title)",
+              "}",
+              "",
+              'label := "C"',
+              "if score >= 90 {",
+              '    label = "A"',
+              "} else if score >= 60 {",
+              '    label = "B"',
+              "}",
+              "",
+              "// Go 的 switch 默认不穿透",
+              "switch kind {",
+              'case "pdf":',
+              "    return renderPDF()",
+              'case "csv":',
+              "    return renderCSV()",
+              "default:",
+              '    return fmt.Errorf("未知类型: %s", kind)',
+              "}",
+            ].join("\n"),
+          },
+
+          functions: {
+            typescript: [
+              "function sum(nums: number[]): number {",
+              "  return nums.reduce((a, b) => a + b, 0);",
+              "}",
+              "",
+              "// 默认参数 + 箭头函数",
+              'const greet = (name = "世界", greeting = "你好"): string =>',
+              '  greeting + ", " + name + "!";',
+              "",
+              "// 泛型高阶函数",
+              "function map<T, U>(items: T[], fn: (item: T) => U): U[] {",
+              "  return items.map(fn);",
+              "}",
+            ].join("\n"),
+            python: [
+              "def sum(nums: list[int]) -> int:",
+              "    return sum(nums)",
+              "",
+              "# 默认参数 + 仅关键字参数",
+              'def greet(name: str = "世界", *, greeting: str = "你好") -> str:',
+              '    return f"{greeting}, {name}!"',
+              "",
+              "# 高阶函数与类型参数",
+              "from collections.abc import Callable",
+              "from typing import TypeVar",
+              "",
+              'T = TypeVar("T")',
+              'U = TypeVar("U")',
+              "",
+              "def map(items: list[T], fn: Callable[[T], U]) -> list[U]:",
+              "    return [fn(item) for item in items]",
+            ].join("\n"),
+            rust: [
+              "fn sum(nums: &[i32]) -> i32 {",
+              "    nums.iter().sum()",
+              "}",
+              "",
+              "fn greet(name: &str) -> String {",
+              '    format!("你好, {name}!")',
+              "}",
+              "",
+              "// 泛型 + 闭包约束",
+              "fn map<T, U, F: Fn(T) -> U>(items: &[T], f: F) -> Vec<U> {",
+              "    items.iter().map(|item| f(*item)).collect()",
+              "}",
+            ].join("\n"),
+            go: [
+              "func sum(nums []int) int {",
+              "    total := 0",
+              "    for _, n := range nums {",
+              "        total += n",
+              "    }",
+              "    return total",
+              "}",
+              "",
+              "func greet(name string) string {",
+              '    return fmt.Sprintf("你好, %s!", name)',
+              "}",
+              "",
+              "// 泛型函数（Go 1.18+）",
+              "func Map[T, U any](items []T, fn func(T) U) []U {",
+              "    out := make([]U, 0, len(items))",
+              "    for _, it := range items {",
+              "        out = append(out, fn(it))",
+              "    }",
+              "    return out",
+              "}",
+            ].join("\n"),
+          },
+
+          "data-structures": {
+            typescript: [
+              "const list = [1, 2, 3];          // 动态数组",
+              "list.push(4);",
+              "",
+              "const set = new Set([1, 2, 2]);   // 集合自动去重",
+              "const map = new Map<string, number>();",
+              'map.set("a", 1);',
+              "",
+              "const [first, ...rest] = list;   // 解构",
+              "const copy = [...list];          // 浅拷贝",
+            ].join("\n"),
+            python: [
+              "nums = [1, 2, 3]        # list",
+              "nums.append(4)",
+              "",
+              "seen = {1, 2}                   # set 自动去重",
+              'scores = {"a": 1}               # dict',
+              "",
+              "first, *rest = nums             # 解包",
+              "copy = nums[:]                  # 浅拷贝",
+            ].join("\n"),
+            rust: [
+              "let mut v = vec![1, 2, 3];",
+              "v.push(4);",
+              "",
+              "use std::collections::{HashMap, HashSet};",
+              "",
+              "let s: HashSet<i32> = HashSet::from([1, 2]);",
+              "let mut m: HashMap<String, i32> = HashMap::new();",
+              'm.insert("a".to_string(), 1);',
+              "",
+              "let (first, rest) = v.split_first().unwrap();",
+              "let copy = v.clone();",
+            ].join("\n"),
+            go: [
+              "nums := []int{1, 2, 3}",
+              "nums = append(nums, 4)",
+              "",
+              "seen := map[int]bool{}",
+              "scores := map[string]int{}",
+              "",
+              "first, rest := nums[0], nums[1:]",
+              "copy := append([]int(nil), nums...)",
+            ].join("\n"),
+          },
+
+          oop: {
+            typescript: [
+              "interface Shape {",
+              "  area(): number;",
+              "}",
+              "",
+              "class Circle implements Shape {",
+              "  constructor(private radius: number) {}",
+              "",
+              "  area(): number {",
+              "    return Math.PI * this.radius ** 2;",
+              "  }",
+              "}",
+              "",
+              "// 结构化子类型：鸭子类型 + 编译期检查",
+              "function describe(s: Shape): string {",
+              '  return "area=" + s.area().toFixed(2);',
+              "}",
+            ].join("\n"),
+            python: [
+              "from abc import ABC, abstractmethod",
+              "import math",
+              "",
+              "",
+              "class Shape(ABC):",
+              "    @abstractmethod",
+              "    def area(self) -> float: ...",
+              "",
+              "",
+              "class Circle(Shape):",
+              "    def __init__(self, radius: float) -> None:",
+              "        self.radius = radius",
+              "",
+              "    def area(self) -> float:",
+              "        return math.pi * self.radius ** 2",
+            ].join("\n"),
+            rust: [
+              "pub trait Shape {",
+              "    fn area(&self) -> f64;",
+              "}",
+              "",
+              "pub struct Circle {",
+              "    radius: f64,",
+              "}",
+              "",
+              "impl Shape for Circle {",
+              "    fn area(&self) -> f64 {",
+              "        std::f64::consts::PI * self.radius.powi(2)",
+              "    }",
+              "}",
+              "",
+              "// 静态分发：泛型约束，零开销抽象",
+              "fn describe<S: Shape>(s: &S) -> String {",
+              '    format!("area={:.2}", s.area())',
+              "}",
+            ].join("\n"),
+            go: [
+              "type Shape interface {",
+              "    Area() float64",
+              "}",
+              "",
+              "type Circle struct {",
+              "    Radius float64",
+              "}",
+              "",
+              "func (c Circle) Area() float64 {",
+              "    return math.Pi * c.Radius * c.Radius",
+              "}",
+              "",
+              "// 接口是隐式实现的：只要方法集匹配即可",
+              "func Describe(s Shape) string {",
+              '    return fmt.Sprintf("area=%.2f", s.Area())',
+              "}",
+            ].join("\n"),
+          },
+
+          "error-handling": {
+            typescript: [
+              "async function loadUser(id: string) {",
+              "  try {",
+              "    const res = await fetch(url);",
+              "    if (!res.ok) throw new HttpError(res.status);",
+              "    return await res.json();",
+              "  } catch (err) {",
+              "    // 只捕获能处理的错误，其余继续上抛",
+              "    if (err instanceof HttpError && err.status === 404) return null;",
+              "    throw err;",
+              "  } finally {",
+              "    release();",
+              "  }",
+              "}"
+            ].join("\n"),
+            python: [
+              "try:",
+              "    response = requests.get(url, timeout=5)",
+              "    response.raise_for_status()",
+              "    return response.json()",
+              "except requests.HTTPError as err:",
+              "    if err.response is not None and err.response.status_code == 404:",
+              "        return None",
+              "    raise",
+              "except requests.Timeout as err:",
+              '    raise DataError("请求超时") from err',
+            ].join("\n"),
+            rust: [
+              "match fetch(url) {",
+              "    Ok(res) if res.status() == 404 => Ok(None),",
+              "    Ok(res) => res.json().map(Some).map_err(Into::into),",
+              "    Err(e) if e.is_timeout() => Err(Error::Timeout),",
+              "    Err(e) => Err(e.into()),",
+              "}",
+              "",
+              "// 传播错误用 ? 运算符",
+              "fn load(id: u64) -> Result<User, AppError> {",
+              "    let raw = store.get(id)?;",
+              "    let user = serde_json::from_str(&raw)?;",
+              "    Ok(user)",
+              "}",
+            ].join("\n"),
+            go: [
+              "res, err := fetch(url)",
+              "if err != nil {",
+              "    // errors.Is 用于判断哨兵错误",
+              "    if errors.Is(err, ErrNotFound) {",
+              "        return nil, nil",
+              "    }",
+              '    return nil, fmt.Errorf("fetch %s: %w", url, err)',
+              "}",
+              "defer res.Body.Close()",
+              "",
+              "return parse(res.Body)",
+            ].join("\n"),
+          },
+
+          concurrency: {
+            typescript: [
+              "// 并发执行，失败也返回结果",
+              "const results = await Promise.allSettled([",
+              "  fetchUser(id),",
+              "  fetchOrders(id),",
+              "]);",
+              "",
+              "// 超时控制",
+              "const controller = new AbortController();",
+              "setTimeout(() => controller.abort(), 3000);",
+              "const res = await fetch(url, { signal: controller.signal });",
+            ].join("\n"),
+            python: [
+              "import asyncio",
+              "",
+              "# gather 等待全部完成",
+              "results = await asyncio.gather(",
+              "    fetch_user(uid),",
+              "    fetch_orders(uid),",
+              "    return_exceptions=True,",
+              ")",
+              "",
+              "# 超时控制",
+              "async with asyncio.timeout(3):",
+              "    await fetch(url)",
+            ].join("\n"),
+            rust: [
+              "// join! 同时轮询多个 future",
+              "let (user, orders) = tokio::join!(fetch_user(uid), fetch_orders(uid));",
+              "",
+              "// 超时控制",
+              "let res = tokio::time::timeout(",
+              "    Duration::from_secs(3),",
+              "    fetch(url),",
+              ").await;",
+              "",
+              "// 有所有权的数据可以安全地跨线程移动",
+              "std::thread::spawn(move || {",
+              '    println!("{user:?}");',
+              "});",
+            ].join("\n"),
+            go: [
+              "var wg sync.WaitGroup",
+              "results := make([]Result, len(tasks))",
+              "",
+              "for i, t := range tasks {",
+              "    wg.Add(1)",
+              "    go func(i int, t Task) {",
+              "        defer wg.Done()",
+              "        results[i] = run(t)",
+              "    }(i, t)",
+              "}",
+              "wg.Wait()",
+              "",
+              "// goroutine + channel：消息传递",
+              "ch := make(chan int, 1)",
+              "go func() { ch <- 42 }()",
+              "value := <-ch",
+            ].join("\n"),
+          },
+
+          modules: {
+            typescript: [
+              "// package.json",
+              "{",
+              '  "name": "my-app",',
+              '  "type": "module",',
+              '  "dependencies": { "zod": "^3.23.0" }',
+              "}",
+              "",
+              "// 具名导入 / 默认导入 / 副作用导入",
+              'import { z } from "zod";',
+              'import fs from "node:fs/promises";',
+              'import "./polyfills";',
+              "",
+              'export * from "./types";',
+              'export { helper } from "./utils";',
+            ].join("\n"),
+            python: [
+              "# pyproject.toml",
+              "[project]",
+              'name = "my-app"',
+              'version = "0.1.0"',
+              'dependencies = ["httpx>=0.27"]',
+              "",
+              "# 包内相对导入",
+              "from .core import Engine",
+              "from .schemas import User",
+              "",
+              '__all__ = ["Engine", "User"]',
+            ].join("\n"),
+            rust: [
+              "// Cargo.toml",
+              "[package]",
+              'name = "my-app"',
+              'version = "0.1.0"',
+              'edition = "2021"',
+              "",
+              "[dependencies]",
+              'serde = { version = "1", features = ["derive"] }',
+              "",
+              "use serde::{Deserialize, Serialize};",
+              "",
+              "pub mod engine;",
+              "pub use engine::Engine;",
+            ].join("\n"),
+            go: [
+              "// go.mod",
+              "module github.com/me/my-app",
+              "",
+              "go 1.22",
+              "",
+              "require (",
+              "    github.com/gin-gonic/gin v1.10.0",
+              ")",
+              "",
+              "import (",
+              '    "github.com/gin-gonic/gin"',
+              '    "my-app/internal/store"',
+              ")",
+            ].join("\n"),
+          },
+
+          performance: {
+            typescript: [
+              "// O(n^2) -> O(n)：用哈希表做记忆化",
+              "const seen = new Set<string>();",
+              "for (const item of items) {",
+              "  if (seen.has(item.id)) continue;",
+              "  seen.add(item.id);",
+              "  process(item);",
+              "}",
+              "",
+              "// 避免在热循环里创建闭包与临时数组",
+              "const ids = items.map((i) => i.id);   // 一次遍历",
+            ].join("\n"),
+            python: [
+              "# O(n^2) -> O(n)：用集合做记忆化",
+              "seen = set()",
+              "for item in items:",
+              "    if item.id in seen:",
+              "        continue",
+              "    seen.add(item.id)",
+              "    process(item)",
+              "",
+              "# 列表推导通常比 for 循环更快",
+              "ids = [item.id for item in items]",
+            ].join("\n"),
+            rust: [
+              "// 预分配容量，避免多次扩容",
+              "let mut ids: Vec<u64> = Vec::with_capacity(items.len());",
+              "for item in items {",
+              "    ids.push(item.id);",
+              "}",
+              "",
+              "// 迭代器惰性求值，无需中间集合",
+              "let total: i64 = items.iter().map(|i| i.value).sum();",
+              "",
+              "// 借用而非克隆，避免拷贝开销",
+              "fn total(items: &[Item]) -> i64 {",
+              "    items.iter().map(|i| i.value).sum()",
+              "}",
+            ].join("\n"),
+            go: [
+              "// 预分配容量",
+              "ids := make([]uint64, 0, len(items))",
+              "for _, item := range items {",
+              "    ids = append(ids, item.ID)",
+              "}",
+              "",
+              "// 切片避免每次循环都拷贝底层数组",
+              "func total(items []Item) int64 {",
+              "    var sum int64",
+              "    for _, it := range items {",
+              "        sum += it.Value",
+              "    }",
+              "    return sum",
+              "}",
+            ].join("\n"),
+          },
+        }
+
+        /* ==========================================================
+     语法高亮
+     ========================================================== */
+        var LANGS = {
+          typescript: {
+            label: "TypeScript",
+            kw: "const let var function return if else for while do switch case default break continue new class extends implements interface type enum import export from as async await of in typeof instanceof void null undefined true false this super try catch finally throw yield delete static readonly public private protected satisfies keyof infer never unknown any",
+            types:
+              "string number boolean object symbol bigint Array Promise Record Partial Readonly Map Set Date Error JSON Math console Uint8Array ReadonlyArray",
+            comment: /^\/\/[^\n]*|^\/\*[\s\S]*?\*\//,
+            strings: /^`(?:[^`\\]|\\.)*`|^"(?:[^"\\]|\\.)*"|^'(?:[^'\\]|\\.)*'/,
+          },
+          python: {
+            label: "Python",
+            kw: "def class return if elif else for while import from as with try except finally raise lambda pass break continue global nonlocal assert yield async await True False None and or not is in del match case",
+            types:
+              "self cls Exception ValueError TypeError RuntimeError object str int float bool list dict set tuple bytes print len range enumerate",
+            comment: /^#[^\n]*/,
+            strings: /^f?"(?:[^"\\]|\\.)*"|^f?'(?:[^'\\]|\\.)*'/,
+          },
+          rust: {
+            label: "Rust",
+            kw: "fn let mut const static struct enum impl trait for while loop if else match return use mod pub crate self as in ref move dyn async await unsafe type where break continue",
+            types:
+              "String Vec Option Result Box i8 i16 i32 i64 i128 u8 u16 u32 u64 u128 f32 f64 usize isize bool char str Duration HashMap HashSet println format vec panic write writeln Some None Ok Err",
+            comment: /^\/\/[^\n]*|^\/\*[\s\S]*?\*\//,
+            strings: /^r?"(?:[^"\\]|\\.)*"|^r?'(?:[^'\\]|\\.)*'/,
+          },
+          go: {
+            label: "Go",
+            kw: "func package import var const type struct interface map chan go defer if else for range return switch case default break continue select fallthrough true false nil",
+            types:
+              "string int int8 int16 int32 int64 uint uint8 uint32 uint64 float32 float64 bool byte rune error any fmt errors sync context time",
+            comment: /^\/\/[^\n]*|^\/\*[\s\S]*?\*\//,
+            strings: /^"(?:[^"\\]|\\.)*"|^`[^`]*`|^'[^']'/,
+          },
+        }
+
+        function esc(s) {
+          return s
+            .replace(/&/g, "&amp;")
+            .replace(/</g, "&lt;")
+            .replace(/>/g, "&gt;")
+        }
+
+        function highlight(src, langId) {
+          var cfg = LANGS[langId] || LANGS.typescript
+          var kw = new Set(cfg.kw.split(/\s+/))
+          var types = new Set(cfg.types.split(/\s+/))
+          var out = ""
+          var i = 0
+          var n = src.length
+          while (i < n) {
+            var rest = src.slice(i)
+            var m
+            if ((m = cfg.comment.exec(rest))) {
+              out += '<span class="tok-com">' + esc(m[0]) + "</span>"
+              i += m[0].length
+              continue
+            }
+            if ((m = cfg.strings.exec(rest))) {
+              out += '<span class="tok-str">' + esc(m[0]) + "</span>"
+              i += m[0].length
+              continue
+            }
+            if ((m = /^\d[\d_]*(?:\.\d+)?/.exec(rest))) {
+              out += '<span class="tok-num">' + esc(m[0]) + "</span>"
+              i += m[0].length
+              continue
+            }
+            if ((m = /^[A-Za-z_$][\w$]*/.exec(rest))) {
+              var word = m[0]
+              var after = src.slice(i + word.length)
+              if (kw.has(word))
+                out += '<span class="tok-kw">' + esc(word) + "</span>"
+              else if (/^\s*\(/.test(after))
+                out += '<span class="tok-fn">' + esc(word) + "</span>"
+              else if (types.has(word))
+                out += '<span class="tok-type">' + esc(word) + "</span>"
+              else if (/^[A-Z]/.test(word))
+                out += '<span class="tok-type">' + esc(word) + "</span>"
+              else out += esc(word)
+              i += word.length
+              continue
+            }
+            if ((m = /^[^\s\w$]+/.exec(rest))) {
+              out += '<span class="tok-op">' + esc(m[0]) + "</span>"
+              i += m[0].length
+              continue
+            }
+            out += esc(src[i])
+            i++
+          }
+          return out
+        }
+
+        /* ==========================================================
+     状态
+     ========================================================== */
+        var LANG_KEY = "polyglot.lang"
+        var THEME_KEY = "polyglot.theme"
+        var PROGRESS_KEY = "polyglot.progress"
+        var LANG_IDS = ["typescript", "python", "rust", "go"]
+
+        var currentLang = localStorage.getItem(LANG_KEY) || "typescript"
+        if (!LANGS[currentLang]) currentLang = "typescript"
+
+        var done = new Set()
+        try {
+          JSON.parse(localStorage.getItem(PROGRESS_KEY) || "[]").forEach(
+            function (id) {
+              done.add(id)
+            }
+          )
+        } catch (e) {
+          done = new Set()
+        }
+
+        var TITLES = {
+          overview: "概述",
+          usage: "如何使用本指南",
+          variables: "变量与类型",
+          "control-flow": "控制流",
+          functions: "函数",
+          "data-structures": "数据结构",
+          oop: "面向对象与类型系统",
+          "error-handling": "错误处理",
+          concurrency: "并发模型",
+          modules: "模块与依赖管理",
+          performance: "性能与内存",
+          pitfalls: "常见陷阱",
+          roadmap: "学习路线",
+          resources: "学习资源",
+        }
+
+        /* ==========================================================
+     主题
+     ========================================================== */
+        var root = document.documentElement
+        var themeBtn = document.getElementById("themeBtn")
+        var themeIcon = document.getElementById("themeIcon")
+
+        function applyTheme(theme) {
+          if (theme === "dark") {
+            root.classList.add("dark")
+            themeIcon.innerHTML = '<use href="#i-sun"/>'
+            themeBtn.setAttribute("aria-label", "切换到浅色主题")
+          } else {
+            root.classList.remove("dark")
+            themeIcon.innerHTML = '<use href="#i-moon"/>'
+            themeBtn.setAttribute("aria-label", "切换到深色主题")
+          }
+        }
+
+        var storedTheme = localStorage.getItem(THEME_KEY)
+        applyTheme(
+          storedTheme ||
+            (window.matchMedia("(prefers-color-scheme: dark)").matches
+              ? "dark"
+              : "light")
+        )
+
+        themeBtn.addEventListener("click", function () {
+          var next = root.classList.contains("dark") ? "light" : "dark"
+          localStorage.setItem(THEME_KEY, next)
+          applyTheme(next)
+        })
+
+        /* ==========================================================
+     代码块
+     ========================================================== */
+        var blockLang = new WeakMap()
+
+        function renderBlock(block) {
+          var group = block.getAttribute("data-code")
+          var groupSamples = SAMPLES[group]
+          if (!groupSamples) return
+
+          var langs = LANG_IDS.filter(function (l) {
+            return groupSamples[l]
+          })
+          if (!langs.length) return
+
+          var active = blockLang.get(block) || currentLang
+          if (langs.indexOf(active) === -1) active = langs[0]
+
+          var codeEl = block.querySelector(".code-code")
+          if (codeEl) codeEl.innerHTML = highlight(groupSamples[active], active)
+
+          var langBar = block.querySelector(".code-langs")
+          if (langBar) {
+            if (langBar.childElementCount !== langs.length) {
+              langBar.innerHTML = ""
+              langs.forEach(function (l) {
+                var b = document.createElement("button")
+                b.type = "button"
+                b.className = "code-lang"
+                b.textContent = LANGS[l].label
+                b.setAttribute("data-lang", l)
+                b.addEventListener("click", function () {
+                  blockLang.set(block, l)
+                  renderBlock(block)
+                })
+                langBar.appendChild(b)
+              })
+            }
+            Array.from(langBar.children).forEach(function (b) {
+              b.setAttribute(
+                "data-active",
+                String(b.getAttribute("data-lang") === active)
+              )
+            })
+          }
+        }
+
+        function buildBlockShell(block) {
+          var group = block.getAttribute("data-code")
+          var groupSamples = SAMPLES[group]
+          if (!groupSamples) return
+
+          var toolbar = document.createElement("div")
+          toolbar.className = "code-toolbar"
+
+          var langBar = document.createElement("div")
+          langBar.className = "code-langs"
+
+          var actions = document.createElement("div")
+          actions.className = "code-actions"
+
+          var copyBtn = document.createElement("button")
+          copyBtn.type = "button"
+          copyBtn.className = "code-copy"
+          copyBtn.innerHTML =
+            '<svg class="icon"><use href="#i-copy"/></svg><span>复制</span>'
+
+          actions.appendChild(copyBtn)
+          toolbar.appendChild(langBar)
+          toolbar.appendChild(actions)
+
+          var pre = document.createElement("pre")
+          pre.className = "code-pre"
+          var code = document.createElement("code")
+          code.className = "code-code"
+          pre.appendChild(code)
+
+          block.appendChild(toolbar)
+          block.appendChild(pre)
+        }
+
+        function renderAllBlocks() {
+          document.querySelectorAll("[data-code]").forEach(renderBlock)
+        }
+
+        var globalLang = document.getElementById("globalLang")
+        function syncGlobalLang() {
+          Array.from(globalLang.children).forEach(function (b) {
+            b.setAttribute(
+              "data-active",
+              String(b.getAttribute("data-lang") === currentLang)
+            )
+          })
+        }
+        globalLang.addEventListener("click", function (e) {
+          var btn = e.target.closest("button[data-lang]")
+          if (!btn) return
+          currentLang = btn.getAttribute("data-lang")
+          localStorage.setItem(LANG_KEY, currentLang)
+          syncGlobalLang()
+          renderAllBlocks()
+        })
+        syncGlobalLang()
+
+        /* 复制代码 */
+        function toast(text) {
+          var t = document.getElementById("toast")
+          document.getElementById("toastText").textContent = text
+          t.classList.add("show")
+          clearTimeout(t._timer)
+          t._timer = setTimeout(function () {
+            t.classList.remove("show")
+          }, 1600)
+        }
+
+        function fallbackCopy(text, cb) {
+          var ta = document.createElement("textarea")
+          ta.value = text
+          ta.style.position = "fixed"
+          ta.style.opacity = "0"
+          document.body.appendChild(ta)
+          ta.select()
+          try {
+            document.execCommand("copy")
+            cb()
+          } catch (err) {
+            toast("复制失败，请手动选择代码")
+          }
+          document.body.removeChild(ta)
+        }
+
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest(".code-copy")
+          if (!btn) return
+          var block = btn.closest("[data-code]")
+          var codeEl = block && block.querySelector(".code-code")
+          if (!codeEl) return
+          var text = codeEl.textContent
+          var onCopied = function () {
+            btn.querySelector("span").textContent = "已复制"
+            toast("代码已复制到剪贴板")
+            setTimeout(function () {
+              btn.querySelector("span").textContent = "复制"
+            }, 1600)
+          }
+          if (navigator.clipboard && navigator.clipboard.writeText) {
+            navigator.clipboard
+              .writeText(text)
+              .then(onCopied)
+              .catch(function () {
+                fallbackCopy(text, onCopied)
+              })
+          } else {
+            fallbackCopy(text, onCopied)
+          }
+        })
+
+        /* ==========================================================
+     折叠面板
+     ========================================================== */
+        document
+          .getElementById("pitfallAccordion")
+          .addEventListener("click", function (e) {
+            var trigger = e.target.closest(".acc-trigger")
+            if (!trigger) return
+            var item = trigger.parentElement
+            var open = item.classList.contains("open")
+            item.parentElement
+              .querySelectorAll(".acc-item")
+              .forEach(function (it) {
+                it.classList.remove("open")
+              })
+            if (!open) item.classList.add("open")
+          })
+
+        /* ==========================================================
+     章节进度
+     ========================================================== */
+        var sectionIds = Array.prototype.map.call(
+          document.querySelectorAll("section[data-checkable]"),
+          function (s) {
+            return s.id
+          }
+        )
+
+        var progressFill = document.getElementById("progressFill")
+        var progressLabel = document.getElementById("progressLabel")
+        var progressText = document.getElementById("progressText")
+        var progressRing = document.getElementById("progressRing")
+        var CIRC = 94.2
+
+        function updateProgress() {
+          var n = sectionIds.filter(function (id) {
+            return done.has(id)
+          }).length
+          var pct = sectionIds.length
+            ? Math.round((n / sectionIds.length) * 100)
+            : 0
+          progressFill.style.width = pct + "%"
+          progressLabel.textContent =
+            n + " / " + sectionIds.length + " 个章节已掌握"
+          progressText.textContent = n + "/" + sectionIds.length
+          progressRing.setAttribute(
+            "stroke-dashoffset",
+            String(CIRC - (CIRC * pct) / 100)
+          )
+          document
+            .querySelectorAll(".nav-link[data-section]")
+            .forEach(function (a) {
+              a.classList.toggle(
+                "done",
+                done.has(a.getAttribute("data-section"))
+              )
+            })
+          document.querySelectorAll(".section-check").forEach(function (b) {
+            b.setAttribute(
+              "data-done",
+              String(done.has(b.getAttribute("data-check")))
+            )
+          })
+        }
+
+        document.addEventListener("click", function (e) {
+          var btn = e.target.closest(".section-check")
+          if (!btn) return
+          var id = btn.getAttribute("data-check")
+          if (done.has(id)) {
+            done.delete(id)
+            toast("已取消标记")
+          } else {
+            done.add(id)
+            toast("已标记为掌握")
+          }
+          localStorage.setItem(PROGRESS_KEY, JSON.stringify(Array.from(done)))
+          updateProgress()
+        })
+
+        /* ==========================================================
+     右侧目录
+     ========================================================== */
+        var tocNav = document.getElementById("tocNav")
+        sectionIds.forEach(function (id) {
+          var a = document.createElement("a")
+          a.href = "#" + id
+          a.textContent = TITLES[id] || id
+          a.setAttribute("data-target", id)
+          tocNav.appendChild(a)
+        })
+
+        var navLinks = Array.prototype.slice.call(
+          document.querySelectorAll(".nav-link[data-section]")
+        )
+        var tocLinks = Array.prototype.slice.call(tocNav.querySelectorAll("a"))
+
+        function setActive(id) {
+          navLinks.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("data-section") === id)
+          })
+          tocLinks.forEach(function (a) {
+            a.classList.toggle("active", a.getAttribute("data-target") === id)
+          })
+        }
+
+        var observer = new IntersectionObserver(
+          function (entries) {
+            entries.forEach(function (entry) {
+              if (entry.isIntersecting) setActive(entry.target.id)
+            })
+          },
+          { rootMargin: "-88px 0px -70% 0px", threshold: 0 }
+        )
+        sectionIds.forEach(function (id) {
+          var el = document.getElementById(id)
+          if (el) observer.observe(el)
+        })
+
+        navLinks.forEach(function (a) {
+          a.addEventListener("click", function () {
+            setActive(a.getAttribute("data-section"))
+            closeSidebar()
+          })
+        })
+
+        /* ==========================================================
+     侧边栏（移动端抽屉）
+     ========================================================== */
+        var sidebar = document.getElementById("sidebar")
+        var scrim = document.getElementById("scrim")
+        var menuBtn = document.getElementById("menuBtn")
+
+        function openSidebar() {
+          sidebar.classList.add("open")
+          scrim.classList.add("show")
+        }
+        function closeSidebar() {
+          sidebar.classList.remove("open")
+          scrim.classList.remove("show")
+        }
+        menuBtn.addEventListener("click", openSidebar)
+        scrim.addEventListener("click", closeSidebar)
+        document
+          .getElementById("closeSidebarBtn")
+          .addEventListener("click", closeSidebar)
+
+        document.addEventListener("keydown", function (e) {
+          if (e.key === "Escape") {
+            closeSidebar()
+            closePalette()
+          }
+        })
+
+        /* ==========================================================
+     命令面板
+     ========================================================== */
+        var backdrop = document.getElementById("paletteBackdrop")
+        var input = document.getElementById("paletteInput")
+        var list = document.getElementById("paletteList")
+        var searchBtn = document.getElementById("searchBtn")
+
+        var commands = []
+        sectionIds.forEach(function (id) {
+          commands.push({
+            title: TITLES[id] || id,
+            hint: id,
+            icon: "#i-book",
+            tag: "章节",
+            run: function () {
+              goto(id)
+            },
+          })
+        })
+        commands.push({
+          title: "切换深色 / 浅色主题",
+          hint: "theme",
+          icon: "#i-moon",
+          tag: "操作",
+          run: function () {
+            themeBtn.click()
+          },
+        })
+        commands.push({
+          title: "复制当前页面链接",
+          hint: "share",
+          icon: "#i-copy",
+          tag: "操作",
+          run: function () {
+            var url =
+              location.origin + location.pathname + "#" + currentSection()
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(url).then(function () {
+                toast("链接已复制")
+              })
+            }
+          },
+        })
+        commands.push({
+          title: "回到页面顶部",
+          hint: "top",
+          icon: "#i-arrow-up",
+          tag: "操作",
+          run: function () {
+            window.scrollTo({ top: 0, behavior: "smooth" })
+          },
+        })
+
+        var filtered = commands.slice()
+        var selected = 0
+
+        function openPalette() {
+          backdrop.classList.add("open")
+          input.value = ""
+          filterCommands("")
+          setTimeout(function () {
+            input.focus()
+          }, 30)
+        }
+        function closePalette() {
+          backdrop.classList.remove("open")
+        }
+
+        function filterCommands(q) {
+          var query = q.trim().toLowerCase()
+          filtered = !query
+            ? commands.slice()
+            : commands.filter(function (c) {
+                return (
+                  (c.title + " " + (c.hint || ""))
+                    .toLowerCase()
+                    .indexOf(query) !== -1
+                )
+              })
+          selected = 0
+          renderPalette()
+        }
+
+        function renderPalette() {
+          list.innerHTML = ""
+          if (!filtered.length) {
+            var empty = document.createElement("div")
+            empty.className = "palette-empty"
+            empty.textContent = "没有匹配的结果"
+            list.appendChild(empty)
+            return
+          }
+          filtered.slice(0, 12).forEach(function (c, i) {
+            var item = document.createElement("div")
+            item.className = "palette-item" + (i === selected ? " sel" : "")
+            item.innerHTML =
+              '<svg class="icon"><use href="' +
+              c.icon +
+              '"/></svg>' +
+              '<span class="t"></span>' +
+              '<span class="tag"></span>'
+            item.querySelector(".t").textContent = c.title
+            item.querySelector(".tag").textContent = c.tag
+            item.addEventListener("click", function () {
+              c.run()
+              closePalette()
+            })
+            item.addEventListener("mouseenter", function () {
+              selected = i
+              Array.prototype.forEach.call(list.children, function (el, idx) {
+                el.classList.toggle("sel", idx === selected)
+              })
+            })
+            list.appendChild(item)
+          })
+        }
+
+        function goto(id) {
+          var el = document.getElementById(id)
+          if (!el) return
+          var top = el.getBoundingClientRect().top + window.scrollY - 84
+          window.scrollTo({ top: top, behavior: "smooth" })
+          setActive(id)
+        }
+
+        searchBtn.addEventListener("click", openPalette)
+        backdrop.addEventListener("click", function (e) {
+          if (e.target === backdrop) closePalette()
+        })
+        input.addEventListener("input", function (e) {
+          filterCommands(e.target.value)
+        })
+        input.addEventListener("keydown", function (e) {
+          if (e.key === "ArrowDown") {
+            e.preventDefault()
+            selected = Math.min(selected + 1, Math.min(filtered.length, 12) - 1)
+            renderPalette()
+          } else if (e.key === "ArrowUp") {
+            e.preventDefault()
+            selected = Math.max(selected - 1, 0)
+            renderPalette()
+          } else if (e.key === "Enter") {
+            e.preventDefault()
+            var c = filtered[selected]
+            if (c) {
+              c.run()
+              closePalette()
+            }
+          }
+        })
+
+        document.addEventListener("keydown", function (e) {
+          if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+            e.preventDefault()
+            openPalette()
+          }
+        })
+
+        /* ==========================================================
+     阅读进度 & 回到顶部
+     ========================================================== */
+        var readProgress = document.getElementById("readProgress")
+        var toTop = document.getElementById("toTop")
+        var ticking = false
+
+        function currentSection() {
+          var id = sectionIds[0]
+          var offset = 100
+          sectionIds.forEach(function (sid) {
+            var el = document.getElementById(sid)
+            if (el && el.getBoundingClientRect().top <= offset) id = sid
+          })
+          return id
+        }
+
+        function onScroll() {
+          var h = document.documentElement.scrollHeight - window.innerHeight
+          var pct = h > 0 ? (window.scrollY / h) * 100 : 0
+          readProgress.style.width = pct.toFixed(2) + "%"
+          toTop.classList.toggle("show", window.scrollY > 500)
+          ticking = false
+        }
+        window.addEventListener(
+          "scroll",
+          function () {
+            if (!ticking) {
+              ticking = true
+              requestAnimationFrame(onScroll)
+            }
+          },
+          { passive: true }
+        )
+
+        toTop.addEventListener("click", function () {
+          window.scrollTo({ top: 0, behavior: "smooth" })
+        })
+
+        /* ==========================================================
+     初始化
+     ========================================================== */
+        document.getElementById("year").textContent = new Date().getFullYear()
+        document.querySelectorAll("[data-code]").forEach(buildBlockShell)
+        renderAllBlocks()
+        updateProgress()
+        onScroll()
+        setActive(sectionIds[0])
+      })()
+    </script>
+  </body>
+</html>
