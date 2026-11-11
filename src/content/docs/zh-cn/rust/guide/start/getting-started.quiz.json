@@ -1,0 +1,83 @@
+{
+  "version": 1,
+  "title": "Rust 入门测试",
+  "description": "通过几道题检查你对本节内容的掌握程度。",
+  "questions": [
+    {
+      "id": "q001",
+      "type": "single_choice",
+      "stem": "Rust 的官方构建工具和包管理器是什么？",
+      "options": [
+        {
+          "id": "a",
+          "text": "Cargo"
+        },
+        {
+          "id": "b",
+          "text": "Rustup"
+        },
+        {
+          "id": "c",
+          "text": "rustc"
+        },
+        {
+          "id": "d",
+          "text": "Clippy"
+        }
+      ],
+      "answer": {
+        "value": ["a"]
+      },
+      "explanation": "Cargo 是 Rust 官方的构建系统和包管理器。",
+      "score": 1
+    },
+    {
+      "id": "q002",
+      "type": "multiple_choice",
+      "stem": "以下哪些属于 Rust 工具链？",
+      "options": [
+        {
+          "id": "a",
+          "text": "rustc"
+        },
+        {
+          "id": "b",
+          "text": "cargo"
+        },
+        {
+          "id": "c",
+          "text": "rustup"
+        },
+        {
+          "id": "d",
+          "text": "npm"
+        }
+      ],
+      "answer": {
+        "value": ["a", "b", "c"]
+      },
+      "explanation": "rustc、cargo 和 rustup 都属于 Rust 工具链的重要组成部分。",
+      "score": 1
+    },
+    {
+      "id": "q003",
+      "type": "true_false",
+      "stem": "Cargo 可以管理 Rust 项目的依赖。",
+      "options": [
+        {
+          "id": "true",
+          "text": "正确"
+        },
+        {
+          "id": "false",
+          "text": "错误"
+        }
+      ],
+      "answer": {
+        "value": ["true"]
+      },
+      "explanation": "Cargo 可以通过 Cargo.toml 声明和管理项目依赖。",
+      "score": 1
+    }
+  ]
+}

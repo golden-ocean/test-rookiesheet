@@ -8,14 +8,12 @@ import type {
   InferGetStaticPropsType,
 } from "astro"
 import { getCollection, render } from "astro:content"
-import { parse } from "astro:schema"
 
 export const getStaticPaths = (async () => {
   const entries = await getCollection("docs")
 
   return entries.flatMap((entry) => {
     const [locale, stack, ...rest] = entry.id.split("/")
-
     // 生产环境过滤草稿
     if (import.meta.env.PROD && entry.data.draft) return []
     // 过滤无效路径和 stack 根首页
