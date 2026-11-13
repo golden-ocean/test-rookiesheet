@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="zh-CN" data-theme="study">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Rust 入门手册 · 什么是所有权</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Noto+Serif+SC:wght@600;700&family=Noto+Sans+SC:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap">
+<script>
+/* 初始主题：跟随系统，记住用户选择 */
+try{var t=localStorage.getItem('theme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'studynight':'study';document.documentElement.setAttribute('data-theme',t)}catch(e){}
+</script>
+<script src="https://cdn.tailwindcss.com/3.4.17"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.24/dist/full.min.css" rel="stylesheet">
+<style>
+/* 自定义主题（daisyUI v4 变量） */
+[data-theme=study]{color-scheme:light;--p:234 72% 56%;--pc:0 0% 100%;--s:190 80% 30%;--sc:0 0% 100%;--a:46 95% 49%;--ac:40 60% 10%;--n:222 30% 14%;--nc:0 0% 98%;--b1:0 0% 100%;--b2:220 25% 96%;--b3:220 20% 90%;--bc:222 30% 14%;--in:205 90% 45%;--su:152 60% 33%;--wa:38 95% 50%;--er:0 70% 52%;--rounded-box:.5rem;--rounded-btn:.375rem;--rounded-badge:.25rem}
+[data-theme=studynight]{color-scheme:dark;--p:234 90% 74%;--pc:224 40% 10%;--s:190 70% 55%;--sc:224 40% 10%;--a:46 95% 58%;--ac:40 60% 10%;--n:224 20% 22%;--nc:0 0% 95%;--b1:224 22% 11%;--b2:224 22% 8.5%;--b3:224 18% 18%;--bc:220 20% 90%;--in:205 90% 60%;--su:152 55% 50%;--wa:38 95% 55%;--er:0 80% 65%;--rounded-box:.5rem;--rounded-btn:.375rem;--rounded-badge:.25rem}
+:root{box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:calc(env(safe-area-inset-top,0px) + 5rem);scroll-behavior:smooth}
+body{font-family:"Noto Sans SC",system-ui,-apple-system,"PingFang SC","Microsoft YaHei",sans-serif;background:hsl(var(--b1))}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);background:hsl(var(--b1));z-index:60}
+.serif{font-family:"Noto Serif SC","Songti SC",SimSun,serif}
+code,pre,kbd{font-family:"JetBrains Mono",ui-monospace,Menlo,Consolas,monospace}
+.doc p,.doc li{line-height:1.95;max-width:38em}
+.doc h2{font-family:"Noto Serif SC","Songti SC",serif;font-size:1.5rem;font-weight:700;margin:2.75rem 0 1rem}
+.doc p{margin:0 0 1rem}
+.doc code:not(pre code){background:hsl(var(--b3));padding:.1rem .4rem;border-radius:.25rem;font-size:.88em}
+mark.hl{background:hsl(var(--a)/.4);color:inherit;padding:0 .15em;border-radius:.15em}
+.mockup-code{overflow-x:auto}
+.mockup-code pre{white-space:pre}
+.toc a[aria-current=true]{color:hsl(var(--p));border-left-color:hsl(var(--p));font-weight:700}
+@media (prefers-reduced-motion:reduce){html{scroll-behavior:auto}}
+</style>
+</head>
+<body>
+<div class="drawer lg:drawer-open">
+  <input id="nav-drawer" type="checkbox" class="drawer-toggle">
+
+  <!-- 主内容区 -->
+  <div class="drawer-content min-w-0">
+    <!-- 顶栏 -->
+    <header class="navbar bg-base-100/95 border-b border-base-300 sticky z-50 gap-2 px-4" style="top:env(safe-area-inset-top,0px);backdrop-filter:blur(8px)">
+      <label for="nav-drawer" class="btn btn-ghost btn-square lg:hidden" aria-label="打开目录">☰</label>
+      <div class="flex-1 text-sm text-base-content/70 truncate">Rust 入门手册 / 所有权</div>
+      <label class="input input-bordered input-sm hidden sm:flex items-center gap-2 w-64">
+        <input type="search" class="grow" placeholder="搜索手册内容" aria-label="搜索手册内容">
+        <kbd class="kbd kbd-xs">/</kbd>
+      </label>
+      <label class="swap swap-rotate btn btn-ghost btn-square" title="切换深浅色">
+        <input type="checkbox" id="theme-toggle" aria-label="切换深浅色">
+        <span class="swap-off">☀</span><span class="swap-on">☾</span>
+      </label>
+    </header>
+
+    <div class="flex flex-col xl:flex-row xl:justify-center gap-10 px-4 sm:px-8 py-8 sm:py-10 pb-28 lg:pb-10">
+      <!-- 正文 -->
+      <main class="doc min-w-0 w-full max-w-[44rem]">
+        <div class="breadcrumbs text-sm"><ul>
+          <li><a>手册</a></li><li><a>所有权</a></li><li>什么是所有权</li>
+        </ul></div>
+        <h1 class="serif text-3xl sm:text-4xl font-bold mt-3 mb-4 leading-tight">什么是所有权</h1>
+        <div class="flex flex-wrap items-center gap-2 mb-8 text-sm text-base-content/70">
+          <span class="badge badge-primary badge-outline">基础</span>
+          <span>阅读约 8 分钟</span><span>·</span><span>含 1 道小测验</span>
+        </div>
+
+        <p>所有权是 Rust 管理内存的方式。它不靠垃圾回收，也不要求你手动释放，而是在编译时检查几条规则。违反规则的程序不会通过编译。</p>
+
+        <div role="alert" class="alert alert-info my-6">
+          <span><b>本节目标：</b>读完后，你能说出所有权的三条规则，并判断一段代码里的值是否已被移动。</span>
+        </div>
+
+        <h2 id="rules">所有权规则</h2>
+        <ul class="list-disc pl-6 mb-4">
+          <li>每个值都有一个<mark class="hl">所有者</mark>。</li>
+          <li>同一时间，一个值只能有一个所有者。</li>
+          <li>所有者离开作用域时，这个值会被丢弃。</li>
+        </ul>
+        <p>第二条最容易被忽略：把值赋给另一个变量，所有权会转交过去。</p>
+
+        <h2 id="move">移动</h2>
+        <p>下面的代码把 <code>s1</code> 赋给 <code>s2</code> 后，再使用 <code>s1</code>，编译器会报错。</p>
+        <div class="mockup-code my-5 text-sm">
+          <pre data-prefix="1"><code>let s1 = String::from("hello");</code></pre>
+          <pre data-prefix="2"><code>let s2 = s1;</code></pre>
+          <pre data-prefix="3" class="bg-warning text-warning-content"><code>println!("{s1}"); // 错误：s1 的值已移动</code></pre>
+        </div>
+        <p>赋值之后，<code>s1</code> 不再有效。这样做避免了两个变量在离开作用域时重复释放同一块内存。</p>
+
+        <h2 id="clone">克隆</h2>
+        <p>如果确实需要两份数据，用 <code>clone</code> 显式复制。代价是多一次堆内存的拷贝。</p>
+        <div class="mockup-code my-5 text-sm">
+          <pre data-prefix="1"><code>let s1 = String::from("hello");</code></pre>
+          <pre data-prefix="2"><code>let s2 = s1.clone();</code></pre>
+          <pre data-prefix="3" class="bg-success text-success-content"><code>println!("{s1} {s2}"); // 正常运行</code></pre>
+        </div>
+
+        <h2 id="stack">栈与堆</h2>
+        <p>要理解为什么 <code>String</code> 会被移动而整数不会，先看这两种内存区域的区别。</p>
+        <div class="overflow-x-auto my-5 border border-base-300 rounded-box">
+          <table class="table">
+            <thead><tr><th></th><th>栈</th><th>堆</th></tr></thead>
+            <tbody>
+              <tr><th>存放内容</th><td>大小固定的值，如 <code>i32</code></td><td>大小可变的值，如 <code>String</code></td></tr>
+              <tr><th>分配速度</th><td>快，只需移动栈顶指针</td><td>较慢，要先找到足够的空位</td></tr>
+              <tr><th>访问方式</th><td>直接访问</td><td>通过指针间接访问</td></tr>
+              <tr><th>与所有权的关系</th><td>复制开销小，直接拷贝</td><td>所有权规则主要管理这部分数据</td></tr>
+            </tbody>
+          </table>
+        </div>
+
+        <h2 id="faq">常见问题</h2>
+        <div class="flex flex-col gap-2">
+          <div class="collapse collapse-arrow bg-base-200 border border-base-300"><input type="radio" name="faq" checked aria-label="整数赋值"><div class="collapse-title font-medium">整数赋值后，原变量为什么还能用？</div><div class="collapse-content text-sm leading-7"><p>整数这类类型实现了 <code>Copy</code>，赋值时按位复制，原变量依然有效。只有管理堆数据的类型才会发生移动。</p></div></div>
+          <div class="collapse collapse-arrow bg-base-200 border border-base-300"><input type="radio" name="faq" aria-label="函数传参"><div class="collapse-title font-medium">把值传给函数也会移动吗？</div><div class="collapse-content text-sm leading-7"><p>会。传参和赋值规则一致：<code>String</code> 传进函数后，调用方就不能再用它了。下一节的“借用”专门解决这个问题。</p></div></div>
+          <div class="collapse collapse-arrow bg-base-200 border border-base-300"><input type="radio" name="faq" aria-label="性能"><div class="collapse-title font-medium">移动会让程序变慢吗？</div><div class="collapse-content text-sm leading-7"><p>不会。移动只复制栈上的指针、长度和容量三个字段，不会拷贝堆里的数据。</p></div></div>
+        </div>
+
+        <h2 id="recap">本节小结</h2>
+        <ul class="list-none pl-0 flex flex-col gap-1">
+          <li class="flex gap-3"><span class="text-success font-bold">✓</span>每个值只有一个所有者。</li>
+          <li class="flex gap-3"><span class="text-success font-bold">✓</span>赋值和传参会移动所有权，原变量随即失效。</li>
+          <li class="flex gap-3"><span class="text-success font-bold">✓</span>需要两份堆数据时，显式调用 <code>clone</code>。</li>
+          <li class="flex gap-3"><span class="text-success font-bold">✓</span><code>Copy</code> 类型（如整数）赋值后仍可继续使用。</li>
+        </ul>
+
+        <h2 id="quiz">小测验</h2>
+        <div class="card bg-base-200 border border-base-300">
+          <div class="card-body gap-4">
+            <p class="!mb-0 font-medium">执行 <code>let b = a;</code> 之后，哪种说法正确？（a 是 <code>String</code>）</p>
+            <label class="label cursor-pointer justify-start gap-3"><input type="radio" name="q" value="0" class="radio radio-primary"><span>a 和 b 都可以继续使用</span></label>
+            <label class="label cursor-pointer justify-start gap-3"><input type="radio" name="q" value="1" class="radio radio-primary"><span>a 的所有权转给了 b，a 不能再使用</span></label>
+            <label class="label cursor-pointer justify-start gap-3"><input type="radio" name="q" value="2" class="radio radio-primary"><span>编译器会自动复制一份堆数据给 b</span></label>
+            <div><button id="check" class="btn btn-primary btn-sm">检查答案</button></div>
+            <div id="feedback" role="status" class="hidden"></div>
+          </div>
+        </div>
+
+        <h2>继续学习</h2>
+        <div class="grid gap-4 sm:grid-cols-3">
+          <a class="card bg-base-200 border border-base-300 hover:border-primary"><div class="card-body p-4 gap-2"><span class="badge badge-primary badge-outline">下一节</span><div class="font-bold">引用与借用</div><div class="text-sm text-base-content/70">不转移所有权，也能使用值。约 10 分钟。</div></div></a>
+          <a class="card bg-base-200 border border-base-300 hover:border-primary"><div class="card-body p-4 gap-2"><span class="badge badge-secondary badge-outline">练习</span><div class="font-bold">所有权小练习</div><div class="text-sm text-base-content/70">8 道改错题，修复编译错误。</div></div></a>
+          <a class="card bg-base-200 border border-base-300 hover:border-primary"><div class="card-body p-4 gap-2"><span class="badge badge-accent">扩展</span><div class="font-bold">String 的内存布局</div><div class="text-sm text-base-content/70">指针、长度与容量图解。</div></div></a>
+        </div>
+
+        <div class="join join-vertical sm:join-horizontal w-full mt-10">
+          <button class="btn join-item flex-1 justify-start">上一节：安装与 Hello Cargo</button>
+          <button class="btn btn-primary join-item flex-1 justify-end">下一节：引用与借用</button>
+        </div>
+        <div class="mt-4"><button id="done" class="btn btn-outline btn-sm">标记本节已学完</button></div>
+      </main>
+
+      <!-- 右侧：目录与笔记 -->
+      <aside class="w-full xl:w-60 shrink-0 border-t border-base-300 pt-8 xl:border-0 xl:pt-0">
+        <div class="xl:sticky" style="top:calc(env(safe-area-inset-top,0px) + 6rem)">
+          <div class="flex items-center gap-4 mb-8">
+            <div id="ring" class="radial-progress text-primary" style="--value:25;--size:3.5rem;--thickness:5px" role="progressbar" aria-valuenow="25">
+              <span class="text-xs font-bold text-base-content">25%</span>
+            </div>
+            <div class="text-sm"><div class="font-bold">课程进度</div><div id="count" class="text-base-content/70">已学 3 / 12 节</div></div>
+          </div>
+          <div class="text-sm font-bold mb-2">本页内容</div>
+          <nav class="toc flex flex-col text-sm border-l border-base-300 mb-8" aria-label="本页内容">
+            <a href="#rules" class="pl-3 py-1 -ml-px border-l-2 border-transparent">所有权规则</a>
+            <a href="#move" class="pl-3 py-1 -ml-px border-l-2 border-transparent">移动</a>
+            <a href="#clone" class="pl-3 py-1 -ml-px border-l-2 border-transparent">克隆</a>
+            <a href="#stack" class="pl-3 py-1 -ml-px border-l-2 border-transparent">栈与堆</a>
+            <a href="#faq" class="pl-3 py-1 -ml-px border-l-2 border-transparent">常见问题</a>
+            <a href="#recap" class="pl-3 py-1 -ml-px border-l-2 border-transparent">本节小结</a>
+            <a href="#quiz" class="pl-3 py-1 -ml-px border-l-2 border-transparent">小测验</a>
+          </nav>
+          <div id="note-box" class="text-sm font-bold mb-2">我的笔记</div>
+          <textarea id="note" class="textarea textarea-bordered w-full h-28 text-sm" placeholder="写下这一节的要点，会保存在本机"></textarea>
+        </div>
+      </aside>
+    </div>
+  </div>
+
+  <!-- 左侧目录 -->
+  <div class="drawer-side z-[70]">
+    <label for="nav-drawer" class="drawer-overlay" aria-label="关闭目录"></label>
+    <div class="bg-base-200 border-r border-base-300 w-72 min-h-full p-4" style="padding-top:calc(env(safe-area-inset-top,0px) + 1rem)">
+      <div class="px-2 mb-4">
+        <div class="serif text-xl font-bold">Rust 入门手册</div>
+        <div class="text-xs text-base-content/70 mt-1">共 5 章 · 12 节</div>
+        <progress id="side-progress" class="progress progress-primary w-full mt-3" value="25" max="100" aria-label="课程进度"></progress>
+      </div>
+      <label class="input input-bordered input-sm flex items-center gap-2 mb-4">
+        <input id="side-search" type="search" class="grow" placeholder="筛选小节" aria-label="筛选小节">
+      </label>
+      <ul class="menu w-full p-0 gap-1" id="toc-list">
+        <li><details><summary class="font-bold">1 起步</summary><ul>
+          <li><a data-sec="s1">安装 Rust</a></li>
+          <li><a data-sec="s2">Hello Cargo</a></li>
+        </ul></details></li>
+        <li><details open><summary class="font-bold">2 所有权</summary><ul>
+          <li><a data-sec="s3" class="active">什么是所有权</a></li>
+          <li><a data-sec="s4">引用与借用</a></li>
+          <li><a data-sec="s5">Slice 类型</a></li>
+        </ul></details></li>
+        <li><details><summary class="font-bold">3 结构体</summary><ul>
+          <li><a data-sec="s6">定义与实例化</a></li>
+          <li><a data-sec="s7">方法语法</a></li>
+        </ul></details></li>
+        <li><details><summary class="font-bold">4 枚举与匹配</summary><ul>
+          <li><a data-sec="s8">枚举定义</a></li>
+          <li><a data-sec="s9">match 控制流</a></li>
+        </ul></details></li>
+        <li><details><summary class="font-bold">5 错误处理</summary><ul>
+          <li><a data-sec="s10">panic 与 Result</a></li>
+          <li><a data-sec="s11">用 ? 传播错误</a></li>
+          <li><a data-sec="s12">何时该 panic</a></li>
+        </ul></details></li>
+      </ul>
+      <div class="stats stats-vertical w-full border border-base-300 bg-base-100 mt-6">
+        <div class="stat py-3"><div class="stat-title">连续学习</div><div class="stat-value text-2xl">5 天</div></div>
+        <div class="stat py-3"><div class="stat-title">本周用时</div><div class="stat-value text-2xl">2.5 小时</div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<nav class="btm-nav lg:hidden z-50 border-t border-base-300 bg-base-100" style="padding-bottom:env(safe-area-inset-bottom,0px)" aria-label="快捷导航">
+  <label for="nav-drawer"><span class="btm-nav-label">目录</span></label>
+  <a href="#quiz"><span class="btm-nav-label">测验</span></a>
+  <a href="#note-box"><span class="btm-nav-label">笔记</span></a>
+</nav>
+<div class="toast toast-end z-[80] mb-14 lg:mb-0" id="toast"></div>
+
+<script>
+(function(){
+  /* 主题切换 */
+  var tg=document.getElementById('theme-toggle');
+  tg.checked=document.documentElement.getAttribute('data-theme')==='studynight';
+  tg.addEventListener('change',function(){
+    var t=tg.checked?'studynight':'study';
+    document.documentElement.setAttribute('data-theme',t);
+    try{localStorage.setItem('theme',t)}catch(e){}
+  });
+
+  /* 已学进度：s1、s2 已学完，当前 s3 */
+  var learned={s1:1,s2:1};
+  try{var saved=JSON.parse(localStorage.getItem('learned')||'null');if(saved)learned=saved}catch(e){}
+  function render(){
+    var links=document.querySelectorAll('#toc-list a[data-sec]');
+    links.forEach(function(a){
+      var done=learned[a.dataset.sec];
+      a.dataset.done=done?'1':'';
+      a.textContent=a.textContent.replace(/^✓ /,'');
+      if(done)a.textContent='✓ '+a.textContent;
+    });
+    var n=Object.keys(learned).length,p=Math.round(n/12*100);
+    document.getElementById('count').textContent='已学 '+n+' / 12 节';
+    var sp=document.getElementById('side-progress');if(sp)sp.value=p;
+    var r=document.getElementById('ring');
+    r.style.setProperty('--value',p);r.setAttribute('aria-valuenow',p);
+    r.firstElementChild.textContent=p+'%';
+  }
+  render();
+  document.getElementById('done').addEventListener('click',function(){
+    learned.s3=1;render();
+    try{localStorage.setItem('learned',JSON.stringify(learned))}catch(e){}
+    var t=document.getElementById('toast');
+    t.innerHTML='<div class="alert alert-success"><span>已学完：什么是所有权</span></div>';
+    setTimeout(function(){t.innerHTML=''},2200);
+  });
+
+  /* 测验 */
+  document.getElementById('check').addEventListener('click',function(){
+    var sel=document.querySelector('input[name=q]:checked'),f=document.getElementById('feedback');
+    f.classList.remove('hidden');
+    if(!sel){f.className='alert alert-warning';f.textContent='先选一个答案。';return}
+    if(sel.value==='1'){f.className='alert alert-success';f.textContent='正确。String 的堆数据只有一个所有者，赋值会把所有权移给 b。'}
+    else{f.className='alert alert-error';f.textContent='不对。再看看“移动”一节：赋值不会复制堆数据，也不会让两个变量同时有效。'}
+  });
+
+  /* 目录滚动高亮 */
+  var tocLinks=document.querySelectorAll('.toc a');
+  var io=new IntersectionObserver(function(es){
+    es.forEach(function(e){
+      if(e.isIntersecting){tocLinks.forEach(function(a){a.setAttribute('aria-current',a.getAttribute('href')==='#'+e.target.id)})}
+    });
+  },{rootMargin:'-20% 0px -70% 0px'});
+  document.querySelectorAll('.doc h2[id]').forEach(function(h){io.observe(h)});
+
+  /* 笔记 */
+  var note=document.getElementById('note');
+  try{note.value=localStorage.getItem('note-s3')||''}catch(e){}
+  note.addEventListener('input',function(){try{localStorage.setItem('note-s3',note.value)}catch(e){}});
+
+  /* 侧边栏筛选小节 */
+  var fs=document.getElementById('side-search');
+  fs.addEventListener('input',function(){
+    var q=fs.value.trim().toLowerCase();
+    document.querySelectorAll('#toc-list > li').forEach(function(sec){
+      var any=false;
+      sec.querySelectorAll('ul li').forEach(function(li){
+        var m=!q||li.textContent.toLowerCase().indexOf(q)>-1;
+        li.style.display=m?'':'none';if(m)any=true;
+      });
+      sec.style.display=any?'':'none';
+      var d=sec.querySelector('details');if(d&&q)d.open=any;
+    });
+  });
+
+  /* 快捷键 / 聚焦搜索 */
+  document.addEventListener('keydown',function(e){
+    if(e.key==='/'&&!/INPUT|TEXTAREA/.test(document.activeElement.tagName)){e.preventDefault();var s=document.querySelector('input[type=search]');if(s)s.focus()}
+  });
+})();
+</script>
+</body>
+</html>

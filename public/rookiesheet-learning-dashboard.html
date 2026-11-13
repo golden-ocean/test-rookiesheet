@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RookieSheet — 学习空间</title>
+<style>
+:root{--bg:#f7f8fc;--surface:#fff;--text:#172033;--muted:#7b8498;--line:#e9ecf4;--primary:#5367e8;--primary-soft:#edf0ff;--green:#1eaa78;--orange:#eea348;--purple:#9671e8;--shadow:0 8px 28px rgba(29,43,89,.045)}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--text);font:14px/1.5 Inter,-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}button,input{font:inherit}button{cursor:pointer}.app{min-height:100vh;display:grid;grid-template-columns:238px minmax(0,1fr)}.sidebar{background:#fff;border-right:1px solid var(--line);padding:25px 16px;display:flex;flex-direction:column;gap:26px;position:sticky;top:0;height:100vh}.brand{display:flex;align-items:center;gap:10px;font-size:17px;font-weight:750;letter-spacing:-.5px;padding:0 9px}.brandmark{width:32px;height:32px;border-radius:11px;background:linear-gradient(135deg,#6e81ff,#4656d8);color:white;display:grid;place-items:center;box-shadow:0 5px 12px #5367e833}.navgroup{display:grid;gap:5px}.navlabel{font-size:10px;font-weight:700;letter-spacing:1.3px;color:#a1a8b9;padding:0 12px 7px}.navitem{display:flex;align-items:center;gap:12px;padding:10px 12px;border-radius:10px;color:#747e92;text-decoration:none;transition:.2s}.navitem:hover{background:#f7f8fc;color:var(--text)}.navitem.active{background:var(--primary-soft);color:var(--primary);font-weight:650}.ico{width:18px;text-align:center;font-size:16px}.sidebottom{margin-top:auto;border:1px solid #e8ebfb;background:linear-gradient(145deg,#f7f8ff,#f2f0ff);border-radius:15px;padding:16px}.sidebottom .spark{font-size:22px}.sidebottom strong{display:block;margin:7px 0 4px}.sidebottom p{margin:0;color:var(--muted);font-size:12px}.sidebottom button{margin-top:13px;background:#fff;border:1px solid #e2e6fa;color:var(--primary);border-radius:8px;padding:7px 10px;font-size:12px;font-weight:650}.main{min-width:0;padding:0 36px 40px}.topbar{height:78px;display:flex;align-items:center;gap:16px;border-bottom:1px solid var(--line);margin-bottom:28px}.search{display:flex;align-items:center;gap:10px;background:#fff;border:1px solid var(--line);border-radius:11px;padding:10px 13px;color:#929bad;width:min(360px,50%);box-shadow:0 2px 6px #17203304}.search input{border:0;outline:0;width:100%;background:transparent;color:var(--text);font-size:13px}.kbd{font-size:10px;border:1px solid var(--line);border-radius:5px;padding:2px 5px;color:#9aa2b2;white-space:nowrap}.topright{margin-left:auto;display:flex;align-items:center;gap:16px;color:#7c8597}.iconbtn{border:0;background:transparent;color:inherit;font-size:17px;padding:5px}.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;background:#f4dfd3;color:#935e47;font-weight:750;border:2px solid white;box-shadow:0 0 0 1px var(--line)}.welcome{display:flex;justify-content:space-between;align-items:center;gap:22px;margin-bottom:25px}.eyebrow{font-size:12px;color:var(--primary);font-weight:700;margin-bottom:8px}.welcome h1{font-size:29px;letter-spacing:-1.1px;line-height:1.25;margin:0 0 9px}.welcome p{color:var(--muted);margin:0;font-size:14px}.welcome-art{height:112px;width:250px;flex-shrink:0;border-radius:16px;overflow:hidden;position:relative;background:linear-gradient(120deg,#e6ebff,#f6e8ff 65%,#fff2e7)}.sun{position:absolute;width:45px;height:45px;border-radius:50%;background:#ffdda9;right:35px;top:17px;opacity:.9}.mountain{position:absolute;bottom:-1px;width:0;height:0;border-left:100px solid transparent;border-right:100px solid transparent;border-bottom:70px solid #a9b7f0;left:2px}.mountain.m2{left:90px;border-left-width:100px;border-right-width:100px;border-bottom:92px solid #c5b5ee}.mountain.m3{left:145px;border-left-width:70px;border-right-width:70px;border-bottom:53px solid #8d9ce3}.stats{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));background:#fff;border:1px solid var(--line);border-radius:15px;padding:19px 4px;margin-bottom:31px;box-shadow:var(--shadow)}.stat{display:flex;align-items:center;gap:12px;padding:0 20px;border-right:1px solid var(--line)}.stat:last-child{border:0}.staticon{width:42px;height:42px;display:grid;place-items:center;border-radius:13px;font-size:18px;background:#edf0ff;color:var(--primary)}.stat:nth-child(2) .staticon{background:#e7f8f1;color:var(--green)}.stat:nth-child(3) .staticon{background:#f0eaff;color:var(--purple)}.stat:nth-child(4) .staticon{background:#fff3e3;color:#dc9a35}.statlabel{color:var(--muted);font-size:12px;margin-bottom:3px}.statvalue{font-size:22px;font-weight:750;letter-spacing:-.5px}.statvalue small{font-size:12px;font-weight:500;color:var(--muted);letter-spacing:0}.sectionhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.sectionhead h2{font-size:17px;margin:0;letter-spacing:-.3px}.sectionhead a{color:var(--primary);font-size:12px;text-decoration:none;font-weight:650}.contentgrid{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:24px}.courses{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}.course{background:#fff;border:1px solid var(--line);border-radius:14px;overflow:hidden;transition:.2s;box-shadow:var(--shadow)}.course:hover{transform:translateY(-3px);box-shadow:0 12px 30px #1c2a550d}.coursecover{height:98px;display:flex;align-items:center;padding:18px;position:relative;overflow:hidden}.coursecover:after{content:"";position:absolute;width:130px;height:130px;border:22px solid #ffffff65;border-radius:50%;right:-25px;top:-45px}.coursecover.react{background:linear-gradient(120deg,#e4f6ff,#eef0ff)}.coursecover.node{background:linear-gradient(120deg,#e8f8e9,#f2f9e8)}.coursecover.db{background:linear-gradient(120deg,#eeebff,#f6edff)}.courseicon{width:45px;height:45px;border-radius:13px;background:#ffffffc9;display:grid;place-items:center;font-size:25px;z-index:1}.coursebody{padding:15px}.tag{font-size:10px;font-weight:700;padding:4px 7px;border-radius:5px;display:inline-block;background:#eef0ff;color:#5668d9;margin-bottom:10px}.course h3{font-size:14px;margin:0 0 7px}.course p{font-size:11px;color:var(--muted);line-height:1.65;min-height:36px;margin:0 0 13px}.progressline{height:5px;border-radius:9px;background:#edf0f5;overflow:hidden;margin:8px 0}.progressline span{display:block;height:100%;border-radius:9px;background:linear-gradient(90deg,#6378f4,#8ca0ff)}.coursefoot{display:flex;justify-content:space-between;color:var(--muted);font-size:10px}.rightcol{display:grid;align-content:start;gap:24px}.panel{background:#fff;border:1px solid var(--line);border-radius:14px;padding:17px;box-shadow:var(--shadow)}.paneltitle{display:flex;align-items:center;justify-content:space-between;margin-bottom:15px}.paneltitle h3{font-size:14px;margin:0}.paneltitle a{font-size:11px;color:var(--primary);text-decoration:none}.recent{display:grid;gap:15px}.recentitem{display:flex;align-items:center;gap:11px}.recenticon{width:36px;height:36px;border-radius:11px;display:grid;place-items:center;background:#e9f8f3;color:#20a87a;font-size:16px;flex-shrink:0}.recentitem:nth-child(2) .recenticon{background:#fff1df;color:#e39a39}.recentitem:nth-child(3) .recenticon{background:#efebff;color:#8b6bdb}.recentname{font-weight:650;font-size:12px;margin-bottom:3px}.recentmeta{font-size:10px;color:var(--muted)}.goal{background:linear-gradient(135deg,#f4f5ff,#fff);border:1px solid #e8eaff;border-radius:14px;padding:17px}.goalhead{display:flex;align-items:center;gap:10px}.goalicon{font-size:22px}.goal strong{font-size:13px}.goal p{color:var(--muted);font-size:11px;margin:10px 0}.goal .progressline span{background:linear-gradient(90deg,#a48af5,#6c78ed)}.goalfoot{display:flex;justify-content:space-between;font-size:10px;color:var(--muted)}.bottomgrid{display:grid;grid-template-columns:1.3fr 1fr;gap:22px;margin-top:30px}.pathlist{display:grid;gap:13px}.pathitem{display:flex;align-items:center;gap:12px}.pathnum{width:31px;height:31px;display:grid;place-items:center;border-radius:10px;background:#f1f3ff;color:#6878df;font-weight:750}.pathitem strong{font-size:12px;display:block}.pathitem small{font-size:10px;color:var(--muted)}.pathitem .status{margin-left:auto;font-size:10px;color:var(--green);background:#e9f8f1;padding:4px 7px;border-radius:6px}.noteslist{display:grid;gap:13px}.note{padding-bottom:12px;border-bottom:1px solid #f0f1f6}.note:last-child{padding:0;border:0}.note strong{font-size:12px;display:block;margin-bottom:4px}.note small{color:var(--muted);font-size:10px}.mobilemenu{display:none}
+@media(max-width:1100px){.app{grid-template-columns:205px minmax(0,1fr)}.main{padding:0 24px 30px}.contentgrid{grid-template-columns:1fr}.rightcol{grid-template-columns:1fr 1fr}.courses{grid-template-columns:repeat(3,minmax(0,1fr))}.stat{padding:0 12px}.staticon{width:36px;height:36px}.welcome-art{width:190px}}
+@media(max-width:760px){.app{display:block}.sidebar{display:none}.main{padding:0 16px 28px}.topbar{height:64px;margin-bottom:22px}.mobilemenu{display:block}.search{width:auto;flex:1}.topright{gap:8px}.topright .iconbtn:first-child{display:none}.welcome{align-items:flex-start}.welcome h1{font-size:24px}.welcome-art{display:none}.stats{grid-template-columns:repeat(2,minmax(0,1fr));gap:16px;padding:16px 4px}.stat{border:0;padding:0 12px}.stat:nth-child(odd){border-right:1px solid var(--line)}.statvalue{font-size:20px}.courses{grid-template-columns:1fr}.course{display:grid;grid-template-columns:112px 1fr}.coursecover{height:100%;min-height:160px;padding:12px}.coursecover:after{right:-65px;top:60px}.coursebody{padding:13px}.course p{min-height:0}.rightcol{grid-template-columns:1fr}.bottomgrid{grid-template-columns:1fr}.sectionhead{margin-top:5px}}
+</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar">
+    <div class="brand"><div class="brandmark">✦</div>RookieSheet</div>
+    <nav class="navgroup" aria-label="主导航">
+      <a class="navitem active" href="#"><span class="ico">⌂</span>学习首页</a>
+      <a class="navitem" href="#paths"><span class="ico">⌘</span>学习路径</a>
+      <a class="navitem" href="#courses"><span class="ico">▤</span>文档库</a>
+      <a class="navitem" href="#practice"><span class="ico">◉</span>实践练习</a>
+      <a class="navitem" href="#notes"><span class="ico">▧</span>我的笔记</a>
+      <a class="navitem" href="#notes"><span class="ico">☆</span>收藏夹</a>
+    </nav>
+    <div class="navgroup">
+      <div class="navlabel">学习分类</div>
+      <a class="navitem" href="#courses"><span class="ico">⌘</span>前端开发</a>
+      <a class="navitem" href="#courses"><span class="ico">⌁</span>后端开发</a>
+      <a class="navitem" href="#courses"><span class="ico">▤</span>全栈开发</a>
+      <a class="navitem" href="#courses"><span class="ico">⌘</span>工具与效率</a>
+      <a class="navitem" href="#courses"><span class="ico">◇</span>面试与求职</a>
+    </div>
+    <div class="sidebottom">
+      <div class="spark">🏔️</div><strong>每天进步一点点</strong>
+      <p>持续学习，构建自己的知识体系。</p>
+      <button onclick="document.querySelector('#paths').scrollIntoView({behavior:'smooth'})">查看学习计划 ↗</button>
+    </div>
+  </aside>
+  <main class="main">
+    <header class="topbar">
+      <button class="iconbtn mobilemenu" aria-label="打开菜单" onclick="alert('移动端菜单示意：可在正式版本中展开导航。')">☰</button>
+      <label class="search"><span>⌕</span><input id="searchInput" placeholder="搜索文档、课程、标签..." /><span class="kbd">⌘ K</span></label>
+      <div class="topright"><button class="iconbtn" id="themeBtn" title="切换主题">☼</button><button class="iconbtn" title="通知">♧</button><div class="avatar">O</div></div>
+    </header>
+    <section class="welcome">
+      <div><div class="eyebrow">✦ 你的个人学习空间</div><h1>从零开始，掌握现代 Web 开发</h1><p>系统化的学习路径、精选的文档和实践练习，帮助你持续成长。</p></div>
+      <div class="welcome-art" aria-hidden="true"><div class="sun"></div><div class="mountain"></div><div class="mountain m2"></div><div class="mountain m3"></div></div>
+    </section>
+    <section class="stats">
+      <div class="stat"><div class="staticon">▣</div><div><div class="statlabel">已学课程</div><div class="statvalue">3 <small>/ 12 门</small></div></div></div>
+      <div class="stat"><div class="staticon">◷</div><div><div class="statlabel">学习时长</div><div class="statvalue">28 <small>小时</small></div></div></div>
+      <div class="stat"><div class="staticon">▤</div><div><div class="statlabel">笔记数量</div><div class="statvalue">15 <small>篇</small></div></div></div>
+      <div class="stat"><div class="staticon">☆</div><div><div class="statlabel">收藏文档</div><div class="statvalue">8 <small>篇</small></div></div></div>
+    </section>
+    <div class="contentgrid">
+      <section id="courses">
+        <div class="sectionhead"><h2>推荐课程</h2><a href="#paths">查看全部 →</a></div>
+        <div class="courses" id="courseList">
+          <article class="course" data-search="react 前端开发 组件 状态"><div class="coursecover react"><div class="courseicon" style="color:#149eca">⚛</div></div><div class="coursebody"><span class="tag">前端开发</span><h3>React 18 从入门到实践</h3><p>掌握 React 核心概念，构建现代化的交互界面。</p><div class="progressline"><span style="width:45%"></span></div><div class="coursefoot"><span>已学 45%</span><span>6 / 12 节</span></div></div></article>
+          <article class="course" data-search="nodejs 后端开发 api 服务端"><div class="coursecover node"><div class="courseicon" style="color:#60a541">⬡</div></div><div class="coursebody"><span class="tag" style="background:#e9f8e8;color:#46953d">后端开发</span><h3>Node.js 进阶实战</h3><p>深入理解 Node.js，构建可靠的后端服务。</p><div class="progressline"><span style="width:20%;background:linear-gradient(90deg,#50bd76,#8bd39b)"></span></div><div class="coursefoot"><span>已学 20%</span><span>4 / 16 节</span></div></div></article>
+          <article class="course" data-search="postgresql 数据库 sql"><div class="coursecover db"><div class="courseicon" style="color:#8064df">▤</div></div><div class="coursebody"><span class="tag" style="background:#f0eaff;color:#805fe0">数据库</span><h3>PostgreSQL 数据库实战</h3><p>从基础查询到索引优化，建立完整的数据思维。</p><div class="progressline"><span style="width:0%"></span></div><div class="coursefoot"><span>已学 0%</span><span>0 / 10 节</span></div></div></article>
+        </div>
+        <div id="noResults" style="display:none;color:#7b8498;padding:20px 0">没有找到匹配的课程，试试其他关键词。</div>
+      </section>
+      <aside class="rightcol">
+        <div class="panel"><div class="paneltitle"><h3>最近学习</h3><a href="#courses">查看全部</a></div><div class="recent">
+          <div class="recentitem"><div class="recenticon">◉</div><div><div class="recentname">Rust 语言入门</div><div class="recentmeta">第 3 章 · 所有权与借用</div></div></div>
+          <div class="recentitem"><div class="recenticon">♬</div><div><div class="recentname">JavaScript 进阶</div><div class="recentmeta">第 5 节 · 异步编程</div></div></div>
+          <div class="recentitem"><div class="recenticon">△</div><div><div class="recentname">Linux 基础</div><div class="recentmeta">第 2 章 · 文件系统与权限</div></div></div>
+        </div></div>
+        <div class="goal"><div class="goalhead"><span class="goalicon">🎯</span><strong>本周学习目标</strong></div><p>本周累计学习 5 小时，保持稳定的学习节奏。</p><div class="progressline"><span style="width:68%"></span></div><div class="goalfoot"><span>已完成 3.4 小时</span><span>68%</span></div></div>
+      </aside>
+    </div>
+    <div class="bottomgrid">
+      <section class="panel" id="paths"><div class="paneltitle"><h3>前端开发学习路径</h3><a href="#courses">完整路径 →</a></div><div class="pathlist">
+        <div class="pathitem"><div class="pathnum">✓</div><div><strong>HTML & CSS 基础</strong><small>页面结构与样式布局</small></div><span class="status">已完成</span></div>
+        <div class="pathitem"><div class="pathnum">✓</div><div><strong>JavaScript 基础</strong><small>语言核心与 DOM 操作</small></div><span class="status">已完成</span></div>
+        <div class="pathitem"><div class="pathnum">3</div><div><strong>React 入门</strong><small>组件、Props 与 State</small></div><span class="status" style="color:#5367e8;background:#edf0ff">进行中</span></div>
+        <div class="pathitem"><div class="pathnum">4</div><div><strong>React 进阶</strong><small>Hooks、路由与数据请求</small><span></span></div></div>
+      </div></section>
+      <section class="panel" id="notes"><div class="paneltitle"><h3>我的笔记</h3><a href="#notes">管理笔记 →</a></div><div class="noteslist">
+        <div class="note"><strong>React 组件的三种写法</strong><small>React 18　·　今天更新</small></div>
+        <div class="note"><strong>useEffect 的常见使用场景</strong><small>React 18　·　昨天更新</small></div>
+        <div class="note"><strong>PostgreSQL 常用查询语句</strong><small>数据库　·　10 月 16 日</small></div>
+      </div></section>
+    </div>
+  </main>
+</div>
+<script>
+const search=document.getElementById('searchInput');
+search.addEventListener('input',()=>{const q=search.value.trim().toLowerCase();let visible=0;document.querySelectorAll('.course').forEach(card=>{const show=(card.innerText+' '+card.dataset.search).toLowerCase().includes(q);card.style.display=show?'':'none';if(show)visible++});document.getElementById('noResults').style.display=visible?'none':'block'});
+document.addEventListener('keydown',e=>{if((e.metaKey||e.ctrlKey)&&e.key.toLowerCase()==='k'){e.preventDefault();search.focus()}});
+document.getElementById('themeBtn').addEventListener('click',()=>{document.body.classList.toggle('dark');const dark=document.body.classList.contains('dark');document.documentElement.style.setProperty('--bg',dark?'#111522':'#f7f8fc');document.documentElement.style.setProperty('--surface',dark?'#191e2d':'#fff');document.documentElement.style.setProperty('--text',dark?'#edf0fb':'#172033');document.documentElement.style.setProperty('--muted',dark?'#a0a9bd':'#7b8498');document.documentElement.style.setProperty('--line',dark?'#2b3245':'#e9ecf4');document.querySelectorAll('.sidebar,.stats,.course,.panel,.topbar,.search').forEach(el=>{el.style.background=dark?'#191e2d':'';el.style.color=dark?'#edf0fb':''});document.querySelectorAll('.coursebody,.statlabel,.recentmeta,.course p').forEach(el=>el.style.color=dark?'#a0a9bd':'')});
+</script>
+</body>
+</html>
